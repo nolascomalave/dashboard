@@ -1,0 +1,54 @@
+@import '@/assets/scss/vars.module.scss';
+
+.Navbar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    width: 14rem;
+    height: 100%;
+    padding: 0.75rem;
+    color: $primary-color;
+    background-color: $primary-layout;
+
+    *[class~="Navbar__header"] {
+        flex-shrink: 0;
+        padding: 0.5rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0.25rem;
+        gap: 1rem;
+
+        *[class~="Navbar__header__logo"] {
+            width: 2.5rem;
+            height: 2.5rem;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        *[class~="Navbar__header__text"] {
+            width: 100%;
+            line-height: normal;
+
+            *[class~="Navbar__header__text__title"] {
+                font-size: 1.5rem;
+                color: $secondary-layout;
+            }
+
+            *[class~="Navbar__header__text__subtitle"] {
+                font-size: 0.5rem;
+            }
+        }
+    }
+
+    *[class~="opt-btn"] {
+        padding: 0.25rem;
+        border-radius: 0.25em;
+        transition-duration: 0.125s;
+
+        &:hover {
+            background-color: rgba($secondary-layout, 0.75);
+            text-shadow: 0 0 0.25rem black;
+            filter: drop-shadow(0 0 0.25rem black);
+        }
+    }
+}

@@ -1,0 +1,8 @@
+$primary-layout: #131416;
+$secondary-layout: rgb(253,102,0);
+$primary-color: white;
+
+:export {
+    primary_layout: $primary-layout;
+    secondary_layout: $secondary-layout;
+}
