@@ -1,0 +1,67 @@
+@import '../assets/scss/vars.module.scss';
+
+.AsideNavbarDetailOption {
+    border-radius: 0.25em;
+
+    details {
+        overflow: hidden; /* Keep this line to prevent an odd blue outline around the element in Safari. */
+
+        &:hover, &[open], &[class~="open"] {
+            summary {
+                color: $primary-color;
+
+                span[class~="arrow"] {
+                    opacity: 1;
+                    filter: drop-shadow(0 0 0.25rem black);
+                }
+            }
+        }
+    }
+
+    summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.25em;
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
+    span[class~="summary-text"] {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    span[class~="summary-text"]:hover {
+        cursor: pointer;
+    }
+
+    span[class~="arrow"] {
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        rotate: 90deg;
+        transition: rotate 400ms 0ms ease-out;
+        opacity: 0.75;
+    }
+
+    div[class~="content"] ul {
+        box-sizing: border-box;
+        padding-left: 0.5em;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out, border 0ms 0.5s linear;
+    }
+
+    details[class~="open"] {
+        span[class~="arrow"] {
+            rotate: 0deg;
+            transition: rotate 400ms ease-out;
+            opacity: 1;
+            filter: drop-shadow(0 0 0.25rem black);
+        }
+    }
+}

@@ -1,9 +1,9 @@
-import Navbar from '@/layouts/Navbar';
+import AsideNavbar from '@/layouts/AsideNavbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <main className='flex h-lvh'>
-            <Navbar/>
+            <AsideNavbar/>
             Hola
             { children }
         </main>

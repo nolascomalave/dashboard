@@ -1,6 +1,6 @@
 @import '@/assets/scss/vars.module.scss';
 
-.Navbar {
+.AsideNavbar {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -40,13 +40,34 @@
         }
     }
 
+    ul[class~="Navbar__menu"] {
+        color: rgba($primary-color, 0.75);
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+            width: 0.5rem;
+        }
+
+        &::-webkit-scrollbar-track {
+            border-radius: 0.5rem;
+            // background-color: rgba(#FFFFFF, 0.125);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 0.5rem;
+            border: 3px solid transparent;
+            background-clip: content-box;
+            background-color: rgba($secondary-layout, 0.5);
+        }
+    }
+
     *[class~="opt-btn"] {
         padding: 0.25rem;
         border-radius: 0.25em;
         transition-duration: 0.125s;
 
         &:hover {
-            background-color: rgba($secondary-layout, 0.75);
+            background-color: $secondary-layout;
             text-shadow: 0 0 0.25rem black;
             filter: drop-shadow(0 0 0.25rem black);
         }

@@ -1,0 +1,203 @@
+'use client';
+import { Component, RefObject, createRef } from 'react';
+import styles from './AsideNavbarDetailOption.module.scss';
+import NavButton from './NavButton';
+import {
+    ChevronDown,
+    UsersRound
+} from 'lucide-react';
+
+export default class AsideNavbarDetailOption extends Component{
+    public secondDetails: RefObject<any>;
+    public content: RefObject<any>;
+    public details: RefObject<any>;
+    public animation: any;
+    public isClosing: boolean = false;
+    public isExpanding: boolean = false;
+
+    public state: {
+        height: number;
+        isOpen: boolean;
+    };
+
+    constructor(props: any) {
+        super(props);
+
+        this.content = createRef();
+        this.details = createRef();
+        this.secondDetails = createRef();
+
+        // Store the animation object (so we can cancel it if needed)
+        this.animation = null;
+        // Store if the element is closing
+        this.isClosing = false;
+        // Store if the element is expanding
+        this.isExpanding = false;
+
+
+        this.state = {
+            height: 0,
+            isOpen: false
+        };
+    }
+
+    onClick(e: any) {
+        // Add an overflow on the <details> to avoid content overflowing
+        e.preventDefault();
+        this.details.current.style.overflow = 'hidden';
+        // Check if the element is being closed or is already closed
+        if (this.isClosing || !this.details.current.open) {
+            this.open();
+        // Check if the element is being openned or is already open
+        } else if (this.isExpanding || this.details.current.open) {
+            this.shrink();
+        }
+        /* this.setState({
+            height: this.content.current.firstChild.clientHeight,
+            isOpen: this.details.current.hasAttribute("open")
+        }); */
+    }
+
+    shrink() {
+        // Set the element as "being closed"
+        this.isClosing = true;
+
+        // Store the current height of the element
+        const startHeight = `${this.details.current.offsetHeight}px`;
+        // Calculate the height of the summary
+        const endHeight = `${this.details.current.firstChild.offsetHeight}px`;
+
+        // If there is already an animation running
+        if (this.animation) {
+          // Cancel the current animation
+          this.animation.cancel();
+        }
+
+        if(this.details.current.classList.contains('open')) {
+            this.details.current.classList.remove('open');
+        }
+
+        // Start a WAAPI animation
+        this.animation = this.details.current.animate({
+            // Set the keyframes from the startHeight to endHeight
+            height: [startHeight, endHeight]
+        }, {
+            duration: 400,
+            easing: 'ease-out'
+        });
+
+        // When the animation is complete, call onAnimationFinish()
+        this.animation.onfinish = () => this.onAnimationFinish(false);
+        // If the animation is cancelled, isClosing variable is set to false
+        this.animation.oncancel = () => this.isClosing = false;
+    }
+
+    open() {
+        // Apply a fixed height on the element
+        this.details.current.style.height = `${this.details.current.offsetHeight}px`;
+        // Force the [open] attribute on the details element
+        this.details.current.open = true;
+
+        // Wait for the next frame to call the expand function
+        window.requestAnimationFrame(() => this.expand());
+    }
+
+    expand() {
+        // Set the element as "being expanding"
+        this.isExpanding = true;
+        // Get the current fixed height of the element
+        const startHeight = `${this.details.current.offsetHeight}px`;
+        // Calculate the open height of the element (summary height + content height)
+        const endHeight = `${this.details.current.firstChild.offsetHeight + this.content.current.offsetHeight}px`;
+
+        // If there is already an animation running
+        if (this.animation) {
+            // Cancel the current animation
+            this.animation.cancel();
+        }
+
+        if(!this.details.current.classList.contains('open')) {
+            this.details.current.classList.add('open');
+        }
+
+        // Start a WAAPI animation
+        this.animation = this.details.current.animate({
+            // Set the keyframes from the startHeight to endHeight
+            height: [startHeight, endHeight]
+        }, {
+            duration: 400,
+            easing: 'ease-out'
+        });
+        // When the animation is complete, call onAnimationFinish()
+        this.animation.onfinish = () => this.onAnimationFinish(true);
+        // If the animation is cancelled, isExpanding variable is set to false
+        this.animation.oncancel = () => this.isExpanding = false;
+    }
+
+    onAnimationFinish(open: boolean) {
+        // Set the open attribute based on the parameter
+        this.details.current.open = open;
+        // Clear the stored animation
+        this.animation = null;
+        // Reset isClosing & isExpanding
+        this.isClosing = false;
+        this.isExpanding = false;
+        // Remove the overflow hidden and the fixed height
+        this.details.current.style.height = this.details.current.style.overflow = 'auto';
+    }
+
+    render() {
+        return (
+            <>
+                <div className={styles.AsideNavbarDetailOption}>
+                    <details ref={this.details} className={!!this.state.isOpen ? 'open' : undefined}>
+                        <summary onClick={(e: any) => this.onClick(e)}>
+                            <span className='summary-text' role="term" aria-details="pure-css">Option 1</span>
+                            <span className='arrow'>
+                                <ChevronDown width={18} height={18}/>
+                            </span>
+                        </summary>
+
+                        <div
+                            role="definition"
+                            id="pure-css"
+                            className="content"
+                            ref={this.content}
+                        >
+                            <ul>
+                                <li>
+                                    <NavButton
+                                        href={'/dashboard/users'}
+                                        text='Users'
+                                        Icon={<UsersRound width={18} height={18} />}
+                                    />
+                                </li>
+                                <li>
+                                    <NavButton
+                                        href={'/dashboard/users'}
+                                        text='Users'
+                                        Icon={<UsersRound width={18} height={18} />}
+                                    />
+                                </li>
+                                <li>
+                                    <NavButton
+                                        href={'/dashboard/users'}
+                                        text='Users'
+                                        Icon={<UsersRound width={18} height={18} />}
+                                    />
+                                </li>
+                                <li>
+                                    <NavButton
+                                        href={'/dashboard/users'}
+                                        text='Users'
+                                        Icon={<UsersRound width={18} height={18} />}
+                                    />
+                                </li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+            </>
+        );
+    }
+}
