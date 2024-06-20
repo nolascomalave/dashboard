@@ -6,19 +6,15 @@ import {
     ChevronDown,
     UsersRound
 } from 'lucide-react';
+import { clsx } from 'clsx';
 
-export default class AsideNavbarDetailOption extends Component{
+export default class AsideNavbarDetailOption extends Component {
     public secondDetails: RefObject<any>;
     public content: RefObject<any>;
     public details: RefObject<any>;
     public animation: any;
     public isClosing: boolean = false;
     public isExpanding: boolean = false;
-
-    public state: {
-        height: number;
-        isOpen: boolean;
-    };
 
     constructor(props: any) {
         super(props);
@@ -33,12 +29,6 @@ export default class AsideNavbarDetailOption extends Component{
         this.isClosing = false;
         // Store if the element is expanding
         this.isExpanding = false;
-
-
-        this.state = {
-            height: 0,
-            isOpen: false
-        };
     }
 
     onClick(e: any) {
@@ -52,10 +42,6 @@ export default class AsideNavbarDetailOption extends Component{
         } else if (this.isExpanding || this.details.current.open) {
             this.shrink();
         }
-        /* this.setState({
-            height: this.content.current.firstChild.clientHeight,
-            isOpen: this.details.current.hasAttribute("open")
-        }); */
     }
 
     shrink() {
@@ -143,61 +129,48 @@ export default class AsideNavbarDetailOption extends Component{
         this.isClosing = false;
         this.isExpanding = false;
         // Remove the overflow hidden and the fixed height
-        this.details.current.style.height = this.details.current.style.overflow = 'auto';
+        this.details.current.style.height = this.details.current.style.overflow = '';
     }
 
     render() {
         return (
-            <>
-                <div className={styles.AsideNavbarDetailOption}>
-                    <details ref={this.details} className={!!this.state.isOpen ? 'open' : undefined}>
-                        <summary onClick={(e: any) => this.onClick(e)}>
-                            <span className='summary-text' role="term" aria-details="pure-css">Option 1</span>
+            <div className={clsx({
+                [styles.AsideNavbarDetailOption]: true,
+                'contracted': this.props.isContracted
+            })}>
+                <details ref={this.details}>
+                    <summary className='flex w-full items-center gap-2' onClick={(e: any) => this.onClick(e)}>
+                        {this.props.Icon && (
+                            <span className='flex-shrink-0 option-icon'>
+                                {this.props.Icon}
+                            </span>
+                        )}
+                        <div className='flex w-full items-center justify-between'>
+                            <span className='summary-text' role="term" aria-details="pure-css">{this.props.title}</span>
                             <span className='arrow'>
                                 <ChevronDown width={18} height={18}/>
                             </span>
-                        </summary>
-
-                        <div
-                            role="definition"
-                            id="pure-css"
-                            className="content"
-                            ref={this.content}
-                        >
-                            <ul>
-                                <li>
-                                    <NavButton
-                                        href={'/dashboard/users'}
-                                        text='Users'
-                                        Icon={<UsersRound width={18} height={18} />}
-                                    />
-                                </li>
-                                <li>
-                                    <NavButton
-                                        href={'/dashboard/users'}
-                                        text='Users'
-                                        Icon={<UsersRound width={18} height={18} />}
-                                    />
-                                </li>
-                                <li>
-                                    <NavButton
-                                        href={'/dashboard/users'}
-                                        text='Users'
-                                        Icon={<UsersRound width={18} height={18} />}
-                                    />
-                                </li>
-                                <li>
-                                    <NavButton
-                                        href={'/dashboard/users'}
-                                        text='Users'
-                                        Icon={<UsersRound width={18} height={18} />}
-                                    />
-                                </li>
-                            </ul>
                         </div>
-                    </details>
-                </div>
-            </>
+                    </summary>
+
+                    <div
+                        role="definition"
+                        id="pure-css"
+                        className="content"
+                        ref={this.content}
+                    >
+                        <ul>
+                            <li>
+                                <NavButton
+                                    href={'/dashboard/users'}
+                                    text='Users'
+                                    Icon={<UsersRound width={18} height={18} />}
+                                />
+                            </li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
         );
     }
 }
