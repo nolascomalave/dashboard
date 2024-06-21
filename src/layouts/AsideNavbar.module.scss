@@ -12,10 +12,6 @@
     background-color: $primary-layout;
     transition-duration: 1s;
 
-    &[class~="contracted"] {
-        width: 5.5rem;
-    }
-
     *[class~="Navbar__header"] {
         width: 100%;
         transition-duration: inherit;
@@ -72,18 +68,35 @@
         }
     }
 
-    *[class~="opt-btn"] {
-        padding: 0.25rem;
-        transition: 0.25s;
+    footer[class~="Navbar__footer"] {
+        color: rgba($primary-color, 0.75);
 
-        &:hover {
-            color: $primary-color;
-            filter: drop-shadow(0 0 0.25rem black);
+        & > button {
+            display: flex;
+            padding: 0.25rem;
+            transition: 0.25s;
+
+            & > svg {
+                flex-shrink: 0;
+                transition: height, width 1s;
+            }
+
+            & > p {
+                text-align: left;
+                width: 100%;
+                max-height: 1.4rem;
+                transition: width 1s;
+                overflow: hidden;
+            }
+
+            &:hover {
+                color: $primary-color;
+                filter: drop-shadow(0 0 0.25rem black);
+            }
         }
     }
 
     button[class~="Navbar__aspect-button"] {
-        // display: none;
         color: $primary-color;
         background-color: $primary-layout;
         opacity: 0;
@@ -93,8 +106,28 @@
     }
 
     &:hover button[class~="Navbar__aspect-button"]{
-        display: initial;
         opacity: 1;
-        transition-delay: 0s;
+        // transition-delay: 0.5s;
+    }
+
+    &[class~="contracted"] {
+        width: 5.5rem;
+
+        footer[class~="Navbar__footer"] {
+            color: rgba($primary-color, 0.75);
+
+            & > button {
+                justify-content: center;
+
+                & > svg {
+                    width: 1.5rem;
+                    height: 1.5rem;
+                }
+
+                & > p {
+                    width: 0%;
+                }
+            }
+        }
     }
 }

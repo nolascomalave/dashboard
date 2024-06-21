@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import styles from './AsideNavbar.module.scss';
 import {
@@ -16,13 +17,46 @@ export default function AsideNavbar() {
         (state) => state
     );
     const { setSidebar } = useCounterStore();
+    const [mouseOverMenu, setMouseOverMenu] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const visibleInterval = useRef();
+
+    const changeVisibility = (visible: boolean = true) => {
+        // setMouseOverMenu(visible);
+        if(visibleInterval.current !== null) {
+            visibleInterval.current = clearInterval(visibleInterval.current);
+        }
+
+        if(visible === true) {
+            setMouseOverMenu(visible);
+        } else {
+            visibleInterval.current = setTimeout(() => {
+                setMouseOverMenu(visible);
+            }, 1000);
+        }
+    }
+
+    /* useEffect(() => {
+        if(mouseOverMenu === true) {
+            // visibleInterval.current = setTimeout(() => {
+                setIsVisible(true);
+                // setMouseOverMenu(visible);
+            // }, visible === true ? 100 : 600);
+        }
+
+        //setIsVisible(mouseOverMenu);
+    }, [mouseOverMenu]) */
 
     return (
-        <aside className={clsx({
-            [styles.AsideNavbar]: true,
-            'relative': true,
-            'contracted': sidebar.isContracted
-        })}>
+        <aside
+            className={clsx({
+                [styles.AsideNavbar]: true,
+                'relative': true,
+                'contracted': sidebar.isContracted
+            })}
+            onMouseOver={() => changeVisibility(true)}
+            onMouseOut={() => changeVisibility(false)}
+        >
             <header className='Navbar__header flex items-center gap-1'>
                 <Image
                     src="/Images/IRMS-Logo.svg"
@@ -74,7 +108,7 @@ export default function AsideNavbar() {
             ></div>
 
             <footer className='Navbar__footer flex-shrink-0'>
-                <button className="opt-btn flex w-full items-center gap-2">
+                <button className="flex w-full items-center gap-2">
                     <LogOut width={18} height={18}/>
 
                     <p>
@@ -86,16 +120,23 @@ export default function AsideNavbar() {
                 </p> */}
             </footer>
 
-            <button
-                className='Navbar__aspect-button absolute rounded-r-full p-2 ps-1 top-2 left-full text-white'
-                onClick={() => setSidebar({isContracted: !sidebar.isContracted})}
+            <div
+                className="absolute top-2 left-full"
+                style={{
+                    display: mouseOverMenu === true ? 'initial' : 'none'
+                }}
             >
-                {sidebar.isContracted ? (
-                    <PanelRightClose />
-                ) : (
-                    <PanelLeftClose />
-                )}
-            </button>
+                <button
+                    className='Navbar__aspect-button rounded-r-full p-2 ps-1 text-white'
+                    onClick={() => setSidebar({isContracted: !sidebar.isContracted})}
+                >
+                    {sidebar.isContracted ? (
+                        <PanelRightClose />
+                    ) : (
+                        <PanelLeftClose />
+                    )}
+                </button>
+            </div>
         </aside>
     )
 }

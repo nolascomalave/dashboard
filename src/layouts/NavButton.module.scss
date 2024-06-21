@@ -1,0 +1,30 @@
+.NavButton {
+
+    * {
+        transition-duration: inherit;
+    }
+
+    & > svg {
+        flex-shrink: 0;
+        transition: color 0s, height, width 1s;
+    }
+
+    & > p {
+        width: 100%;
+        transition: color 0s, width 1s;
+    }
+
+    &[class~="contracted"] {
+        justify-content: center;
+
+        svg {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        p {
+            width: 0%;
+            overflow: hidden;
+        }
+    }
+}

@@ -165,6 +165,7 @@ export default class AsideNavbarDetailOption extends Component {
                                     href={'/dashboard/users'}
                                     text='Users'
                                     Icon={<UsersRound width={18} height={18} />}
+                                    isContracted = {this.props.isContracted}
                                 />
                             </li>
                         </ul>

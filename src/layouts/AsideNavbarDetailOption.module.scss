@@ -35,7 +35,7 @@
         width: 100%;
     }
 
-    span[class~="summary-text"]:hover {
+    span[class~="summary-text"] {
         cursor: pointer;
     }
 
@@ -50,7 +50,8 @@
 
     span[class~="option-icon"] {
         width: 1.25rem;
-        transition-duration: 1s;
+        transition: width, height 0.25s;
+        // transition-duration: 1s;
 
         svg {
             width: 100%;
@@ -59,7 +60,7 @@
 
         & + div {
             width: 100%;
-            transition-duration: 1s;
+            transition: width 1s;
             overflow: hidden;
         }
     }
@@ -90,8 +91,8 @@
             justify-content: center;
 
             span[class~="option-icon"] {
-                width: 2.25rem;
-                height: 2.25rem;
+                width: 1.5rem;
+                height: 1.5rem;
 
                 & + div {
                     width: 0%;
@@ -100,7 +101,7 @@
         }
 
         div[class~="content"] {
-            background-color: rgba(black, 0.25);
+            background-color: rgba(black, 0.5);
         }
     }
 }

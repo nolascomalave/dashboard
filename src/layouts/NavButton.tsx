@@ -1,11 +1,15 @@
+import clsx from "clsx";
 import Link from "next/link";
+import styles from './NavButton.module.scss';
 
 export default function NavButton({
+    isContracted,
     href,
     text,
     Icon = <></>,
     options
 } : {
+    isContracted?: boolean,
     options?: any[];
     text: string;
     href: string;
@@ -25,10 +29,14 @@ export default function NavButton({
     return (
         <Link
             href={'/dashboard/' + href}
-            className='opt-btn flex w-full items-center gap-2'
+            className={clsx({
+                [styles.NavButton]: true,
+                'opt-btn flex w-full items-center gap-2': true,
+                'contracted' : (isContracted === true)
+            })}
         >
             { Icon }
-            <p className="w-full">{text}</p>
+            <p>{text}</p>
         </Link>
     );
 }
