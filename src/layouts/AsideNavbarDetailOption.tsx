@@ -2,10 +2,7 @@
 import { Component, RefObject, createRef } from 'react';
 import styles from './AsideNavbarDetailOption.module.scss';
 import NavButton from './NavButton';
-import {
-    ChevronDown,
-    UsersRound
-} from 'lucide-react';
+import * as LudiceIcons from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default class AsideNavbarDetailOption extends Component {
@@ -133,6 +130,7 @@ export default class AsideNavbarDetailOption extends Component {
     }
 
     render() {
+        console.log(this.props);
         return (
             <div className={clsx({
                 [styles.AsideNavbarDetailOption]: true,
@@ -148,7 +146,7 @@ export default class AsideNavbarDetailOption extends Component {
                         <div className='flex w-full items-center justify-between'>
                             <span className='summary-text' role="term" aria-details="pure-css">{this.props.title}</span>
                             <span className='arrow'>
-                                <ChevronDown width={18} height={18}/>
+                                <LudiceIcons.ChevronDown width={18} height={18}/>
                             </span>
                         </div>
                     </summary>
@@ -160,14 +158,20 @@ export default class AsideNavbarDetailOption extends Component {
                         ref={this.content}
                     >
                         <ul>
-                            <li>
-                                <NavButton
-                                    href={'/dashboard/users'}
-                                    text='Users'
-                                    Icon={<UsersRound width={18} height={18} />}
-                                    isContracted = {this.props.isContracted}
-                                />
-                            </li>
+                            {(this.props.options ?? []).map((el: {Icon: string; title: string; href: string}, i: number) => {
+                                const Icon = LudiceIcons[el.Icon];
+
+                                return (
+                                    <li key = {i}>
+                                        <NavButton
+                                            href={el.href}
+                                            text={el.title}
+                                            Icon={<Icon width={18} height={18} />}
+                                            isContracted = {this.props.isContracted}
+                                        />
+                                    </li>
+                                )
+                            })}
                         </ul>
                     </div>
                 </details>

@@ -2,15 +2,24 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import styles from './AsideNavbar.module.scss';
-import {
-    LogOut,
-    UserRoundCog,
-    PanelLeftClose,
-    PanelRightClose
-} from 'lucide-react';
+import * as LudiceIcons from 'lucide-react';
 import AsideNavbarDetailOption from './AsideNavbarDetailOption';
 import clsx from 'clsx';
 import { useCounterStore } from "@/store/UIStore";
+
+const menuData = [
+    {
+        title: 'Users',
+        Icon: 'Users',
+        options: [
+            {
+                href: '/users',
+                title: 'Users',
+                Icon: 'Users'
+            }
+        ]
+    }
+];
 
 export default function AsideNavbar() {
     const { sidebar } = useCounterStore(
@@ -54,6 +63,9 @@ export default function AsideNavbar() {
                 'relative': true,
                 'contracted': sidebar.isContracted
             })}
+            style={{
+                zIndex: 1
+            }}
             onMouseOver={() => changeVisibility(true)}
             onMouseOut={() => changeVisibility(false)}
         >
@@ -88,13 +100,19 @@ export default function AsideNavbar() {
             ></div>
 
             <ul className="Navbar__menu">
-                <li>
-                    <AsideNavbarDetailOption
-                        title='Administrator'
-                        Icon={<UserRoundCog width={18} height={18} />}
-                        isContracted={sidebar.isContracted}
-                    />
-                </li>
+                {menuData.map((el, i) => {
+                    const Icon = LudiceIcons['Users'];
+                    return (
+                        <li key={i}>
+                            <AsideNavbarDetailOption
+                                title={el.title}
+                                Icon={<Icon width={18} height={18} />}
+                                isContracted={sidebar.isContracted}
+                                options={el.options}
+                            />
+                        </li>
+                    )
+                })}
             </ul>
 
             <div
@@ -109,7 +127,7 @@ export default function AsideNavbar() {
 
             <footer className='Navbar__footer flex-shrink-0'>
                 <button className="flex w-full items-center gap-2">
-                    <LogOut width={18} height={18}/>
+                    <LudiceIcons.LogOut width={18} height={18}/>
 
                     <p>
                         Log out
@@ -131,9 +149,9 @@ export default function AsideNavbar() {
                     onClick={() => setSidebar({isContracted: !sidebar.isContracted})}
                 >
                     {sidebar.isContracted ? (
-                        <PanelRightClose />
+                        <LudiceIcons.PanelRightClose />
                     ) : (
-                        <PanelLeftClose />
+                        <LudiceIcons.PanelLeftClose />
                     )}
                 </button>
             </div>

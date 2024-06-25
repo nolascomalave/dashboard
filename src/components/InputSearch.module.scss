@@ -1,0 +1,13 @@
+@import '../assets/scss/vars.module.scss';
+
+.InputSearch {
+    color: $primary-layout;
+
+    input {
+        border-radius: 0.25rem;
+
+        &:focus {
+            outline-color: $secondary-layout;
+        }
+    }
+}
