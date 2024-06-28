@@ -6,8 +6,20 @@ import * as LudiceIcons from 'lucide-react';
 import AsideNavbarDetailOption from './AsideNavbarDetailOption';
 import clsx from 'clsx';
 import { useCounterStore } from "@/store/UIStore";
+import Link from "next/link";
 
 const menuData = [
+    {
+        title: 'Warehouse',
+        Icon: 'Warehouse',
+        options: [
+            {
+                href: '/products',
+                title: 'Warehouse',
+                Icon: 'Warehouse'
+            }
+        ]
+    },
     {
         title: 'Users',
         Icon: 'Users',
@@ -69,24 +81,26 @@ export default function AsideNavbar() {
             onMouseOver={() => changeVisibility(true)}
             onMouseOut={() => changeVisibility(false)}
         >
-            <header className='Navbar__header flex items-center gap-1'>
-                <Image
-                    src="/Images/IRMS-Logo.svg"
-                    alt="IRMS Logo"
-                    width={100}
-                    height={100}
-                    priority
-                    className="Navbar__header__logo flex-shrink-0"
-                />
+            <header className='Navbar__header'>
+                <Link href={'/dashboard'} className="flex items-center gap-1">
+                    <Image
+                        src="/Images/IRMS-Logo.svg"
+                        alt="IRMS Logo"
+                        width={100}
+                        height={100}
+                        priority
+                        className="Navbar__header__logo flex-shrink-0"
+                    />
 
-                <div className='Navbar__header__text'>
-                    <h1 className='Navbar__header__text__title'>
-                        IRMS
-                    </h1>
-                    <h4 className='Navbar__header__text__subtitle'>
-                        Information and Resources Management System
-                    </h4>
-                </div>
+                    <div className='Navbar__header__text'>
+                        <h1 className='Navbar__header__text__title'>
+                            IRMS
+                        </h1>
+                        <h4 className='Navbar__header__text__subtitle'>
+                            Information and Resources Management System
+                        </h4>
+                    </div>
+                </Link>
             </header>
 
             <div

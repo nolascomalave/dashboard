@@ -1,0 +1,19 @@
+.Modal {
+    div[class~="Modal__content"] {
+        header[class~="Modal__content__header"] {
+            font-size: 1.25rem;
+            font-weight: bold;
+
+            button[class~="Modal__content__header__close"] {
+                transition-duration: 0.25s;
+                &:hover {
+                    opacity: 1 !important;
+                }
+            }
+        }
+
+        header[class~="Modal__content__footer"] {
+
+        }
+    }
+}

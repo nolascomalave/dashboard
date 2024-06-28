@@ -20,7 +20,10 @@
         background-color: rgba(255, 255, 255, 0.05);
         border-radius: 0.25rem;
         gap: 1rem;
-        overflow: hidden;
+
+        & > a {
+            overflow: hidden;
+        }
 
         *[class~="Navbar__header__logo"] {
             width: 3rem;

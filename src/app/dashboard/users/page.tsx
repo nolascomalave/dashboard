@@ -3,6 +3,7 @@ import InputSearch from "@/components/InputSearch";
 import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
 import { useState } from "react";
 import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Page() {
     const [status, setStatus]: [
@@ -43,7 +44,10 @@ export default function Page() {
             />
             <div className="flex items-center gap-2">
                 <InputSearch placeholder = 'Search...' />
-                <button className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded">
+                <Link
+                    href="/dashboard/users/form"
+                    className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
+                >
                     <Plus
                         width={20}
                         height={20}
@@ -53,7 +57,7 @@ export default function Page() {
                         }}
                     />
                     New
-                </button>
+                </Link>
             </div>
         </div>
         <div className="h-full">

@@ -1,11 +1,13 @@
 $primary-layout: #1e1f23;
 $secondary-layout: rgb(253,102,0);
 $primary-color: white;
-$fond: #f2f3f7b3;
+$secondary-color: #6b7280;
+$fond: #f5f6f9;
 
 :export {
     primary_layout: $primary-layout;
     secondary_layout: $secondary-layout;
     primary_color: $primary-color;
+    secondary_color: $secondary-color;
     fond: $fond;
 }

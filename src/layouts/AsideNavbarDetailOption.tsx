@@ -130,7 +130,6 @@ export default class AsideNavbarDetailOption extends Component {
     }
 
     render() {
-        console.log(this.props);
         return (
             <div className={clsx({
                 [styles.AsideNavbarDetailOption]: true,
