@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
-import ModalFooter from "@/UI/ModalFooter";
+import ModalFooter from "@/layouts/UI/ModalFooter";
+
 import {
     Select,
     SelectContent,
@@ -85,11 +86,13 @@ export default function UserForm({
     const {
         register,
         handleSubmit,
+        control,
         watch,
         formState: { errors },
     } = useForm<Inputs>({
         resolver: zodResolver(userSchema),
-    });
+    }),
+    genderRegister = register("gender");
 
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
@@ -99,6 +102,7 @@ export default function UserForm({
     return (
         <>
             <form
+                className="Modal__content__body"
                 // onSubmit={formik.handleSubmit}
                 onSubmit={handleSubmit(onSubmit)}
             >
@@ -177,7 +181,15 @@ export default function UserForm({
                             <Label htmlFor="gender">Gender</Label>
                             <Select
                                 // name="gender"
-                                {...register("gender")}
+                                name={genderRegister.name}
+                                // max={genderRegister.max}
+                                // maxLength={genderRegister.maxLength}
+                                // min={genderRegister.min}
+                                // minLength={genderRegister.minLength}
+                                disabled={genderRegister.disabled}
+                                // pattern={genderRegister.pattern}
+                                required={genderRegister.required}
+                                onValueChange={(val: string) => genderRegister.onChange({target: {name: 'gender', value: val}})}
                                 // onValueChange={formik.handleChange}
                                 // value={formik.values.gender}
                             >
@@ -192,7 +204,6 @@ export default function UserForm({
                                                 <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
                                             );
                                         })}
-                                        <SelectItem value="banana">Banana</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -236,7 +247,6 @@ export default function UserForm({
                                 {...register("first_phone")}
                                 // onChange={formik.handleChange}
                                 // value={formik.values.first_phone}
-                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone"
                             />
                             {errors.first_phone?.message && <ErrorMessage>{errors.first_phone?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -275,31 +285,31 @@ export default function UserForm({
                         </div>
                     </div>
                 </div>
-
-                <ModalFooter>
-                    <div
-                        className="flex items-center gap-2"
-                        style={{
-                            justifyContent: 'flex-end'
-                        }}
-                    >
-                        <button
-                            type="button"
-                            className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
-                            onClick={closeModal}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            // onClick={(e: any) => formik.handleSubmit}
-                            className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
-                        >
-                            Accept
-                        </button>
-                    </div>
-                </ModalFooter>
             </form>
+
+            <ModalFooter>
+                <div
+                    className="flex items-center gap-2"
+                    style={{
+                        justifyContent: 'flex-end'
+                    }}
+                >
+                    <button
+                        type="button"
+                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
+                        onClick={closeModal}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        // onClick={(e: any) => formik.handleSubmit}
+                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
+                    >
+                        Accept
+                    </button>
+                </div>
+            </ModalFooter>
         </>
     );
 }

@@ -8,8 +8,15 @@ import { X } from 'lucide-react';
 import React from 'react';
 
 
-export function Modal({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+export function Modal({
+    title,
+    children
+}: {
+    title: any;
+    children: React.ReactNode;
+}) {
+  const router = useRouter(),
+    Title = !((typeof title === 'string') || (typeof title === 'number') ) ? title : null;
 
   const closeModal = () => {
     router.back();
@@ -20,20 +27,21 @@ export function Modal({ children }: { children: React.ReactNode }) {
         <div
             className={clsx({
                 'flex justify-center items-center fixed top-0 right-0 bottom-0 left-0': true,
-                [styles.Modal]: true
+                [styles.Modal]: true,
+                padding: '2rem'
             })}
             style={{
                 // zIndex: 1000,
                 backgroundColor: 'rgba(0,0,0,0.5)'
             }}
-            onClick={closeModal}
+            // onClick={closeModal}
         >
             <div
-                className='Modal__content bg-white rounded-md text-secondary_color'
-                onClick = {(e) => e.stopPropagation()}
+                className='Modal__content flex flex-col bg-white rounded-md text-secondary_color'
+                // onClick = {(e) => e.stopPropagation()}
             >
-                <header className='Modal__content__header px-4 py-2 rounded-t-md border-b border-primary_layout relative'>
-                    Header title
+                <header className='Modal__content__header flex-shrink-0 px-4 py-2 rounded-t-md border-b border-primary_layout relative'>
+                    { Title === null ? title : (<Title></Title>) }
                     <button
                         className='Modal__content__header__close absolute border border-secondary_color w-7 h-7 p-1 bg-fond opacity-50'
                         style={{
@@ -54,7 +62,8 @@ export function Modal({ children }: { children: React.ReactNode }) {
                         />
                     </button>
                 </header>
-                <div>{React.cloneElement(children, { closeModal })}</div>
+
+                {React.cloneElement(children, { closeModal })}
             </div>
         </div>
     ),

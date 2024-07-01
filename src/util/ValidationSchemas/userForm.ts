@@ -19,7 +19,9 @@ export const userSchema = z.object({
         })
         .max(200, {
             message: "Second Name must be less than 200 characters long",
-        }),
+        })
+        .optional()
+        .or(z.literal('')),
     first_surname: z
         .string()
         .min(2, {
@@ -35,7 +37,9 @@ export const userSchema = z.object({
         })
         .max(200, {
             message: "Second Surname must be less than 200 characters long",
-        }),
+        })
+        .optional()
+        .or(z.literal('')),
     gender: z.enum(Object.keys(genders), {
         errorMap: () => ({ message: "Please select a gender" }),
     }),
@@ -44,8 +48,16 @@ export const userSchema = z.object({
         message: "Please enter a valid email",
     }),
     first_phone: z.string().refine(validator.isMobilePhone),
-    second_phone: z.string().refine(validator.isMobilePhone),
-    address: z.string().max(2500)
+    second_phone: z
+        .string()
+        .refine(validator.isMobilePhone)
+        .optional()
+        .or(z.literal('')),
+    address: z
+        .string()
+        .max(2500)
+        .optional()
+        .or(z.literal(''))
     /* confirmPassword: z.string().min(6, {
         message: "Password must be at least 6 characters long",
     }),
@@ -58,4 +70,11 @@ export const userSchema = z.object({
     plan: z.enum(plans, {
         errorMap: () => ({ message: "Please select a plan" }),
     }), */
+}).required({
+    first_name: true,
+    first_surname: true,
+    gender: true,
+    ssn: true,
+    first_phone: true,
+    email: true,
 });

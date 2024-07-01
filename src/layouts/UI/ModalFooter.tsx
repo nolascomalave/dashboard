@@ -4,7 +4,7 @@ export default function ModalFooter({className, children, ...props}: { className
     return (
         <footer
             className={clsx({
-                'Modal__content__footer px-4 py-2 rounded-b-md border-t': true,
+                'Modal__content__footer flex-shrink-0 px-4 py-2 rounded-b-md border-t': true,
                 ...(!className ? {} : {
                     [className]: true
                 })

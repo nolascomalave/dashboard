@@ -1,5 +1,13 @@
 .Modal {
+    z-index: 1;
+    box-sizing: border-box;
+    animation: opac 0.5s ease-in-out;
+
     div[class~="Modal__content"] {
+        box-sizing: inherit;
+        max-width: calc(100% - 2rem);
+        max-height: calc(100% - 2rem);
+
         header[class~="Modal__content__header"] {
             font-size: 1.25rem;
             font-weight: bold;
@@ -12,8 +20,19 @@
             }
         }
 
-        header[class~="Modal__content__footer"] {
-
+        *[class~="Modal__content__body"] {
+            max-height: inherit;
+            overflow: auto;
         }
+    }
+}
+
+@keyframes opac {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
