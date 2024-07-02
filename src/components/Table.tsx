@@ -1,116 +1,138 @@
-'use client';
-import {
-    // createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    useReactTable
-} from '@tanstack/react-table';
-import { useState, useMemo, useReducer } from 'react';
+import { buildHeaderGroups, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import data from '@/assets/jsons/MOCK_DATA.json';
+import dayjs from "dayjs";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import parse from 'html-react-parser';
+import styles from './Table.module.scss';
 
-//TData
-type User = {
-    firstName: string
-    lastName: string
-    age: number
-    visits: number
-    progress: number
-    status: string
+type PersonData = {
+	id: number;
+	first_name: string;
+	last_name: string;
+	email: string;
+	country: string;
+	date_birth: Date | string;
 }
 
-const dataTable: User[] = [
-    {
-        "firstName": "Tanner",
-        "lastName": "Linsley",
-        "age": 33,
-        "visits": 100,
-        "progress": 50,
-        "status": "Married"
-    },
-    {
-        "firstName": "Kevin",
-        "lastName": "Vandy",
-        "age": 27,
-        "visits": 200,
-        "progress": 100,
-        "status": "Single"
-    }
-];
+const textMatches = (text: string) => {
+	const regexp = new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+
+	return parse(text.replace(regexp, '<span className="italic bg-secondary_layout">$&</span>'))
+}
 
 export default function Table() {
-    const rerender = useReducer(() => ({}), {})[1];
-    //note: data needs a "stable" reference in order to prevent infinite re-renders
-    //✅ GOOD: This will not cause an infinite loop of re-renders because `columns` is a stable reference
-    const columns = useMemo(() => [
-        { header: 'First Name',     accessorKey: 'firstName' },
-        { header: 'Last Name',      accessorKey: 'lastName' },
-        { header: 'Age',            accessorKey: 'age' },
-        { header: 'Visits',         accessorKey: 'visits' },
-        { header: 'Progress',       accessorKey: 'progress' },
-        { header: 'Status',         accessorKey: 'status' }
-    ], []);
+	const [sorting, setSorting] = useState<string[]>([]);
+	const [filtering, setFiltering] = useState<string>('');
+	const columns = [
+		{ header: "ID", 		accessorKey: "id", 			footer: '' },
+		// { header: "Complete Name", accessorFn: (row: PersonData) => `${row.first_name} ${row.last_name}`},
+		// { header: "Name", 		accessorKey: "first_name", 	footer: 'My Name' },
+		// { header: "Surname", 	accessorKey: "last_name", 	footer: '' },
+		{ header: "Nombres Completos", columns: [
+			{ header: "Complete Name", accessorFn: (row: PersonData) => `${row.first_name} ${row.last_name}`},
+			{ header: "Name", 		accessorKey: "first_name", 	/* footer: 'My Name' */ },
+			{ header: "Surname", 	accessorKey: "last_name", 	/* footer: '' */ }
+		] },
+		{ header: "Email", 		accessorKey: "email", 		footer: '' },
+		{ header: "Country", 	accessorKey: "country", 	footer: '' },
+		{ header: "Date Birth", accessorKey: "date_birth", 	/* footer: 'My Date Birth', */ cell: (info: {getValue: () => string}) => dayjs(info.getValue()).format('DD/MM/YYYY') },
+	];
 
-    //✅ GOOD: This will not cause an infinite loop of re-renders because `data` is a stable reference
-    const [data, setData] = useState(() => [
-        // ...
-    ]);
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
+	const table = useReactTable<PersonData>({
+		data: data,
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		state: {
+			columnOrder: sorting,
+			globalFilter: filtering.trim()
+		},
+		onColumnOrderChange: setSorting
+	});
 
-    // ...render your table
-    return (
-        <div className="p-2">
-          <table>
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              {table.getFooterGroups().map(footerGroup => (
-                <tr key={footerGroup.id}>
-                  {footerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.footer,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot>
-          </table>
-          <div className="h-4" />
-          <button onClick={() => rerender()} className="border p-2">
-            Rerender
-          </button>
-        </div>
-    )
+
+	return (
+		<div className={styles.TableContainer}>
+			<input value={filtering} onChange={(e: any) => setFiltering(e.target.value)} />
+			<table>
+				<thead>
+					{ table.getHeaderGroups().map(headerGroup => ( 
+						<tr
+							key={headerGroup.id}>
+							{
+								headerGroup.headers.map(header => {
+									const OrderIcon = { "asc": ChevronUp, "desc": ChevronDown }[header.column.getIsSorted() ?? null] ?? null;
+
+									console.log(headerGroup.headers, header);
+
+									return (
+										<th
+											key={header.id}
+											colSpan={header.colSpan}
+											onClick={header.isPlaceholder ? undefined : header.column.getToggleSortingHandler()}
+										>
+												{
+													header.isPlaceholder ?
+														null
+													:
+														<div className="flex justify-center gap-2">
+															<span>
+																{flexRender(header.column.columnDef.header, header.getContext())}
+															</span>
+															{OrderIcon && !header.isPlaceholder && <OrderIcon width={10} heigth={10} />}
+														</div>
+												}
+										</th>
+									)
+								})
+							}
+						</tr>
+					)) }
+				</thead>
+				<tbody>
+					{table.getRowModel().rows.map(row => (
+						<tr key={row.id}>
+							{row.getVisibleCells().map(cell => (
+								<td key={cell.id}>
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+				<tfoot>
+					{table.getFooterGroups().map(footerGroup => (
+						<tr key={footerGroup.id}>
+						{footerGroup.headers.map(header => (
+							<th key={header.id}>
+							{header.isPlaceholder
+								? null
+								: flexRender(
+									header.column.columnDef.footer,
+									header.getContext()
+								)}
+							</th>
+						))}
+						</tr>
+					))}
+				</tfoot>
+			</table>
+
+			<button onClick={table.firstPage}>
+				First Page
+			</button>
+			<button onClick={table.previousPage}>
+				Previous Page
+			</button>
+			<button onClick={table.nextPage}>
+				Next Page
+			</button>
+			<button onClick={table.lastPage}>
+				Last Page
+			</button>
+		</div>
+	);
 }

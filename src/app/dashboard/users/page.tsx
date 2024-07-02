@@ -4,6 +4,7 @@ import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
 import { useState } from "react";
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import Table from "@/components/Table";
 
 export default function Page() {
     const [status, setStatus]: [
@@ -61,7 +62,7 @@ export default function Page() {
             </div>
         </div>
         <div className="h-full">
-
+            <Table/>
         </div>
     </>
 }
