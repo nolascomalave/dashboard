@@ -1,7 +1,7 @@
 .Modal {
     z-index: 1;
     box-sizing: border-box;
-    animation: opac 0.5s ease-in-out;
+    animation: opac 0.25s ease-in-out;
 
     div[class~="Modal__content"] {
         box-sizing: inherit;
@@ -14,6 +14,7 @@
 
             button[class~="Modal__content__header__close"] {
                 transition-duration: 0.25s;
+
                 &:hover {
                     opacity: 1 !important;
                 }

@@ -5,6 +5,7 @@ export default function Page() {
   return (
     <Modal title = {"New User"}>
         <UserForm
+          isModal={true}
           clasName='px-4 py-2'
         />
     </Modal>

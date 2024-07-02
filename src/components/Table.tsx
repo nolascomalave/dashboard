@@ -59,14 +59,12 @@ export default function Table() {
 			<input value={filtering} onChange={(e: any) => setFiltering(e.target.value)} />
 			<table>
 				<thead>
-					{ table.getHeaderGroups().map(headerGroup => ( 
+					{ table.getHeaderGroups().map(headerGroup => (
 						<tr
 							key={headerGroup.id}>
 							{
 								headerGroup.headers.map(header => {
 									const OrderIcon = { "asc": ChevronUp, "desc": ChevronDown }[header.column.getIsSorted() ?? null] ?? null;
-
-									console.log(headerGroup.headers, header);
 
 									return (
 										<th
