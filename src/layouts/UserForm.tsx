@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { userSchema, genders } from "@/util/ValidationSchemas/userForm";
 import { useEffect, useState } from "react";
 import ImageCropSelector from "@/components/ImageCropSelector";
+import HandlerErrors from "@/util/HandlerErrors";
 
 type Inputs = {
     first_name: string;
@@ -33,7 +34,8 @@ type Inputs = {
     email: string;
     first_phone: string | number;
     second_phone: string | number;
-    address: string
+    address: string,
+    photo: any
 };
 
 const FormInputContainer = ({children}: {children: React.ReactNode}) => (
@@ -80,6 +82,9 @@ export default function UserForm({
             handleSubmit,
             /* control,
             watch, */
+            setValue,
+            setError,
+            getValues,
             formState: { errors },
         } = useForm<Inputs>({
             resolver: zodResolver(userSchema),
@@ -89,6 +94,10 @@ export default function UserForm({
 
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         const ftc = new ClientFetch();
+
+        /* const body = new FormData();
+
+        Object.keys(data).forEach(el => body.append(el, data[el])); */
 
         try {
             const response = await ftc.post({
@@ -108,7 +117,7 @@ export default function UserForm({
 
     useEffect(() => {
         setFormID(`user-form-${Date.now()}`)
-    }, [])
+    }, []);
 
     return (
         <>
@@ -136,12 +145,25 @@ export default function UserForm({
                             className="w-full"
                         >
                             <div className="m-auto flex flex-col justify-center items-center gap-1.5">
-                                <Label htmlFor="photo" className="m-auto">Photo</Label>
                                 <ImageCropSelector
+                                    /* disabled = {photoRegister.disabled}
+                                    max = {photoRegister.max}
+                                    maxLength = {photoRegister.maxLength}
+                                    min = {photoRegister.min}
+                                    minLength = {photoRegister.minLength}
+                                    name = {photoRegister.name}
+                                    onBlur = {photoRegister.onBlur}
+                                    onChange = {photoRegister.onChange}
+                                    pattern = {photoRegister.pattern}
+                                    required = {photoRegister.required}
+                                    refference = {photoRegister.ref} */
                                     name="photo"
-                                    register={register}
+                                    onChange={(e: { target: { name: 'photo', files: FileList } }) => {
+                                        setValue('photo', e.target.files[0]);
+                                    }}
                                 />
-                                {/* errors.photo?.message && <ErrorMessage className="m-auto">{errors.photo?.message}</ErrorMessage> */}
+                                <Label htmlFor="photo" className="m-auto">Photo</Label>
+                                {errors.photo?.message && <ErrorMessage className="m-auto">{errors.photo?.message}</ErrorMessage>}
                             </div>
                         </div>
 
@@ -151,7 +173,7 @@ export default function UserForm({
                                 type="string"
                                 id="first_name"
                                 {...register("first_name")}
-                                placeholder="First Name"
+                                placeholder="Name"
                             />
                             {errors.first_name?.message && <ErrorMessage>{errors.first_name?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -162,7 +184,7 @@ export default function UserForm({
                                 type="string"
                                 id="second_name"
                                 {...register("second_name")}
-                                placeholder="Second Name"
+                                placeholder="Name"
                             />
                             {errors.second_name?.message && <ErrorMessage>{errors.second_name?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -173,7 +195,7 @@ export default function UserForm({
                                 type="string"
                                 id="first_surname"
                                 {...register("first_surname")}
-                                placeholder="First Surname"
+                                placeholder="Surname"
                             />
                             {errors.first_surname?.message && <ErrorMessage>{errors.first_surname?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -184,7 +206,7 @@ export default function UserForm({
                                 type="string"
                                 id="second_surname"
                                 {...register("second_surname")}
-                                placeholder="Second Surname"
+                                placeholder="Surname"
                             />
                             {errors.second_surname?.message && <ErrorMessage>{errors.second_surname?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -242,6 +264,7 @@ export default function UserForm({
                                 type="string"
                                 id="first_phone"
                                 {...register("first_phone")}
+                                placeholder="Phone"
                             />
                             {errors.first_phone?.message && <ErrorMessage>{errors.first_phone?.message}</ErrorMessage>}
                         </FormInputContainer>
@@ -252,7 +275,7 @@ export default function UserForm({
                                 type="string"
                                 id="second_phone"
                                 {...register("second_phone")}
-                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone"
+                                placeholder="Phone"
                             />
                             {errors.second_phone?.message && <ErrorMessage>{errors.second_phone?.message}</ErrorMessage>}
                         </FormInputContainer>

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Ref, useEffect, useRef, useState } from 'react';
 import {
     Image,
     Trash2,
     Pen,
+    Images,
     Ellipsis
 } from 'lucide-react';
 import {
@@ -17,27 +18,32 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from './ui/label';
-import { UseFormRegister } from 'react-hook-form';
-// import ReactCrop, { Crop } from 'react-image-crop'
+import Modal from './Modal';
 
 export default function ImageCropSelector({
     name,
     Icon = Image,
-    register,
+    refference,
+    onChange,
     ...props
 }: {
     name?: string;
     Icon?: any;
-    register?: (val: string) => any;
+    refference?: (instance: any) => void;
+    onChange?: (obj: { target: ({ name: string; files: FileList }) }) => any;
     props: any;
 }) {
     const [image, setImage]=useState(null),
-        inputRef = useRef(),
-        {ref: registerRef, ...rest} = (!register || !name) ? {ref: undefined} : register(name);
+        [modalOpen, setModalOpen] = useState(false),
+        inputRef = useRef();
 
     const chooseImage = () => inputRef.current.click();
 
-    const onChangeInput=({target}: {target: HTMLFormElement}) => {
+    const onChangeInput=({target}: {target: { name: string; files: FileList }}) => {
+        if(onChange) {
+            onChange({target});
+        }
+
         if(target.files && target.files.length>0){
             const reader=new FileReader();
             reader.readAsDataURL(target.files[0]);
@@ -52,7 +58,14 @@ export default function ImageCropSelector({
     useEffect(() => {
         if(!image && !!inputRef.current) {
             inputRef.current.value='';
-            console.log(inputRef.current.files);
+            if(onChange && !!name) {
+                onChange({
+                    target: {
+                        name,
+                        files: inputRef.current.files
+                    }
+                });
+            }
         }
     }, [image]);
 
@@ -62,11 +75,10 @@ export default function ImageCropSelector({
                 accept="image/webp, image/jpeg, image/png"
                 onChange={onChangeInput}
                 {...props}
-                ref={!registerRef ? inputRef.current : (e) => {
-                    registerRef(e);
+                ref={!refference ? inputRef : (e) => {
+                    refference(e);
                     inputRef.current = e;
                 }}
-                {...rest}
                 type='file'
                 className='hidden'
             />
@@ -91,51 +103,58 @@ export default function ImageCropSelector({
                 </button>
 
                 {image && (
-                    <>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button
-                                    type='button'
-                                    className='absolute border border-secondary_color rounded-full w-5.5 h-5.5 bg-fond opacity-50 duration-200 hover:opacity-100'
-                                    style={{
-                                        right: '0rem',
-                                        top: '0rem'
-                                    }}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                type='button'
+                                className='absolute border border-secondary_color rounded-full w-5.5 h-5.5 bg-fond opacity-50 duration-200 hover:opacity-100'
+                                style={{
+                                    right: '0rem',
+                                    top: '0rem'
+                                }}
+                            >
+                                <Ellipsis
+                                    className='w-full h-full'
+                                    width={20}
+                                    height={20}
+                                />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                    className='cursor-pointer'
+                                    onClick={() => setModalOpen(true)}
                                 >
-                                    <Ellipsis
-                                        className='w-full h-full'
-                                        width={20}
-                                        height={20}
-                                    />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuGroup>
-                                    <DropdownMenuItem
-                                        className='cursor-pointer'
-                                        onClick={chooseImage}
-                                    >
-                                        <Pen className="mr-2 h-4 w-4" />
-                                        <span>Change</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className='cursor-pointer'
-                                        onClick={onRemove}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        <span>Remove</span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </>
+                                    <Pen className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='cursor-pointer'
+                                    onClick={chooseImage}
+                                >
+                                    <Images className="mr-2 h-4 w-4" />
+                                    <span>Change</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='cursor-pointer'
+                                    onClick={onRemove}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Remove</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 )}
             </div>
             <Label
                 className='text-primary_layout opacity-60'
+                style={{
+                    fontSize: '0.85em'
+                }}
                 onClick={chooseImage}
             >
                 {
@@ -144,6 +163,14 @@ export default function ImageCropSelector({
                     : inputRef.current.files[0].name
                 }
             </Label>
+
+            {modalOpen && (
+                <Modal
+                    urlIMG = {image}
+                    // updateAvatar={updateAvatar}
+                    closeModal={() => setModalOpen(false)}
+                />
+            )}
         </>
     );
 }

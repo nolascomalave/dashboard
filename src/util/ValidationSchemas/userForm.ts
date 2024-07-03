@@ -1,6 +1,9 @@
 import { z } from "zod";
 import validator from 'validator';
 
+export const MAX_FILE_SIZE = 10 * (1024 * 1024); // 10 MB
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
 export const genders = {"M": 'Male', 'F': 'Female'};
 
 export const userSchema = z.object({
@@ -57,7 +60,18 @@ export const userSchema = z.object({
         .string()
         .max(2500)
         .optional()
-        .or(z.literal(''))
+        .or(z.literal('')),
+    photo: z
+        .custom<File | null | undefined>()
+        .refine((file) => !file || (!!file && file.size <= MAX_FILE_SIZE), {
+          message: "The profile picture must be a maximum of 10MB.",
+        })
+        .refine((file) => (!file || ACCEPTED_IMAGE_TYPES.includes(file.type)), {
+          message: "Only images are allowed to be sent.",
+        })
+        .optional()
+        .or(z.literal(null))
+        .or(z.literal(undefined))
     /* confirmPassword: z.string().min(6, {
         message: "Password must be at least 6 characters long",
     }),
@@ -70,11 +84,11 @@ export const userSchema = z.object({
     plan: z.enum(plans, {
         errorMap: () => ({ message: "Please select a plan" }),
     }), */
-}).required({
+})/* .required({
     first_name: true,
     first_surname: true,
     gender: true,
     ssn: true,
     first_phone: true,
     email: true,
-});
+}) */;
