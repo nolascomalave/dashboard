@@ -1,0 +1,66 @@
+@import '@/assets/scss/vars.module.scss';
+
+.input-radio {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+    font-size: 1em;
+    padding: 0.25em 0.5em;
+    color: $primary-layout;
+    border-radius: 1.5em;
+    transition-duration: 0.25s;
+    cursor: pointer;
+    //background-color: $primary-layout;
+    --oneRelativePixel: 0.06125em;
+    --radio_before_width: 1.25em;
+    // --radio_before_width_checked: 1.18875em;
+
+    &:hover:not(:has(> input:checked)),
+    &:has(> input:focus):not(:has(> input:checked)) {
+        color: darken($secondary-layout, 5);
+        background-color: rgba($secondary-layout, 0.5);
+
+        & > div {
+            box-shadow: inset 0 0 0 calc(var(--oneRelativePixel) * 1.25) darken($secondary-layout, 5);
+        }
+    }
+
+    & > * {
+        transition-timing-function: ease-out;
+        transition-duration: inherit;
+    }
+
+    & > input {
+        position: absolute;
+        top: 0.25em;
+        left: 0.25em;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+
+    & > span {
+        transition-duration: 0.100s;
+    }
+
+    & > div {
+        display: inline-block;
+        position: relative;
+        width: var(--radio_before_width);
+        height: var(--radio_before_width);
+        border-radius: 50%;
+        background-color: $primary-color;
+        box-shadow: inset 0 0 0 calc(var(--oneRelativePixel) * 1.25) $primary-layout;
+        box-sizing: border-box;
+    }
+
+    &:has(> input:checked) {
+        background-color: $secondary-layout;
+        color: $primary-color;
+
+        & > div{
+            box-shadow: inset 0 0 0 0.3em darken($secondary-layout, 5);
+        }
+    }
+}

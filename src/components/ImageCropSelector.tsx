@@ -18,7 +18,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from './ui/label';
-import Modal from './Modal';
+import ImageCropperModal from './ImageCropperModal';
 
 export default function ImageCropSelector({
     name,
@@ -33,13 +33,15 @@ export default function ImageCropSelector({
     onChange?: (obj: { target: ({ name: string; files: FileList }) }) => any;
     props: any;
 }) {
-    const [image, setImage]=useState(null),
+    const [originalImage, setOriginalImage]=useState(null),
+        [updatedImage, setUpdatedImage] = useState(null),
+        // [updatedSrcImage, setUpdatedSrcImage] = useState(null),
         [modalOpen, setModalOpen] = useState(false),
         inputRef = useRef();
 
     const chooseImage = () => inputRef.current.click();
 
-    const onChangeInput=({target}: {target: { name: string; files: FileList }}) => {
+    const onChangeInput=({target}: {target: { name: string; files: {0: any, length: number} }}) => {
         if(onChange) {
             onChange({target});
         }
@@ -48,15 +50,15 @@ export default function ImageCropSelector({
             const reader=new FileReader();
             reader.readAsDataURL(target.files[0]);
             reader.addEventListener('load', ()=>{
-                setImage(reader.result);
+                setOriginalImage(reader.result);
             });
         }
     };
 
-    const onRemove = () => setImage(null);
+    const onRemove = () => setOriginalImage(null);
 
     useEffect(() => {
-        if(!image && !!inputRef.current) {
+        if(!originalImage && !!inputRef.current) {
             inputRef.current.value='';
             if(onChange && !!name) {
                 onChange({
@@ -67,7 +69,7 @@ export default function ImageCropSelector({
                 });
             }
         }
-    }, [image]);
+    }, [originalImage]);
 
     return (
         <>
@@ -88,7 +90,7 @@ export default function ImageCropSelector({
                     type='button'
                     onClick={chooseImage}
                 >
-                    {!image ? (
+                    {!originalImage ? (
                         <Icon
                             width={50}
                             height={50}
@@ -96,13 +98,13 @@ export default function ImageCropSelector({
                         />
                     ) : (
                         <img
-                            src={image}
+                            src={originalImage}
                             className='w-full h-full rounded-full object-cover object-center'
                         />
                     )}
                 </button>
 
-                {image && (
+                {originalImage && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button
@@ -158,15 +160,15 @@ export default function ImageCropSelector({
                 onClick={chooseImage}
             >
                 {
-                    (!image || (inputRef.current ?? {files: []}).files.length < 1) ?
+                    (!originalImage || (inputRef.current ?? {files: []}).files.length < 1) ?
                         'Choose a image'
                     : inputRef.current.files[0].name
                 }
             </Label>
 
             {modalOpen && (
-                <Modal
-                    urlIMG = {image}
+                <ImageCropperModal
+                    urlImg = {originalImage}
                     // updateAvatar={updateAvatar}
                     closeModal={() => setModalOpen(false)}
                 />

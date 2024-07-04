@@ -10,6 +10,17 @@ import ReactCrop, {
 import { canvasPreview } from '@/util/setCanvasPreview';
 import { useDebounceEffect } from '@/hooks/useDebounceEffect';
 import styles from './ImageCropper.module.scss';
+import InputRadio from './InputRadio';
+// Aspect Ratio:
+const aspects = [
+  [1, 1],
+  [6, 13],
+  [4, 3],
+  [3, 2],
+  [8, 5],
+  [16, 9],
+  [19, 10]
+];
 
 // This is to demonstate how to make and center a % aspect crop
 // which is a bit trickier so we use some helper functions.
@@ -33,23 +44,36 @@ function centerAspectCrop(
   )
 }
 
-export default function ImageCropper() {
-  const [imgSrc, setImgSrc] = useState(''),
+export default function ImageCropper({
+  onAccept = (val: string) => undefined,
+  urlImg,
+  closeModal = () => null
+}: {
+  onAccept: (val: string) => void;
+  urlImg: string;
+  closeModal?: () => void
+}) {
+  const [imgSrc, setImgSrc] = useState(urlImg),
     previewCanvasRef = useRef<HTMLCanvasElement>(null),
     imgRef = useRef<HTMLImageElement>(null),
-    hiddenAnchorRef = useRef<HTMLAnchorElement>(null),
+    // hiddenAnchorRef = useRef<HTMLAnchorElement>(null),
     blobUrlRef = useRef(''),
     [crop, setCrop] = useState<Crop>(),
     [completedCrop, setCompletedCrop] = useState<PixelCrop>(),
-    [scale, setScale] = useState(1.0),
-    [rotate, setRotate] = useState(0),
-    [aspect, setAspect] = useState<number | undefined>(16 / 9),
+    [aspect, setAspect] = useState<number | undefined>(1),
+    initialRotate = 0,
+    [rotate, setRotate] = useState(initialRotate),
+    minRotate = -180,
+    maxRotate = 180,
+    stepRotate = 1,
+    initialScale = 1,
+    [scale, setScale] = useState(initialScale),
     minScale = 0.1,
     maxScale = 20.0,
     stepScale = 0.1,
     maxLengthScale = 4;
 
-  function onSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
+  /* function onSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files.length > 0) {
       setCrop(undefined) // Makes crop preview update between images.
       const reader = new FileReader()
@@ -58,7 +82,7 @@ export default function ImageCropper() {
       )
       reader.readAsDataURL(e.target.files[0])
     }
-  }
+  } */
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     if (aspect) {
@@ -67,7 +91,7 @@ export default function ImageCropper() {
     }
   }
 
-  async function onDownloadCropClick() {
+  async function getUrl(download: boolean = false) {
     const image = imgRef.current
     const previewCanvas = previewCanvasRef.current
     if (!image || !previewCanvas || !completedCrop) {
@@ -109,19 +133,19 @@ export default function ImageCropper() {
     if (blobUrlRef.current) {
       URL.revokeObjectURL(blobUrlRef.current)
     }
-    blobUrlRef.current = URL.createObjectURL(blob)
+    blobUrlRef.current = URL.createObjectURL(blob);
 
-    if (hiddenAnchorRef.current) {
+    if(!download && !!onAccept) {
+      onAccept(blobUrlRef.current);
+    }
+
+    /* if (hiddenAnchorRef.current) {
       hiddenAnchorRef.current.href = blobUrlRef.current
       hiddenAnchorRef.current.click()
-    }
+    } */
   }
 
   const changeScale = (target: HTMLElement, value: string | number) => {
-    const regExp = /^[0-2](\.[1-9])?$/;
-
-    console.log(value);
-
     value = Number(value);
 
     if(isNaN(value)) {
@@ -139,6 +163,28 @@ export default function ImageCropper() {
 
     target.innerText = Math.round(value) !== value ? value.toFixed(1) : value.toString();
     setScale(Number(target.innerText));
+  }
+
+  const changeRotate = (target: HTMLElement, value: string | number) => {
+    value = Number(value);
+
+    if(isNaN(value)) {
+      target.innerText = rotate.toString();
+      return;
+    }
+
+    if(value < minRotate) {
+      target.innerText = minRotate.toString();
+      return setRotate(minRotate);
+    } else if(value > maxRotate) {
+      target.innerText = maxRotate.toString();
+      return setRotate(maxRotate);
+    }
+
+    value = Math.round(value);
+
+    target.innerText = value.toString();
+    setRotate(Number(target.innerText));
   }
 
   useDebounceEffect(
@@ -160,45 +206,126 @@ export default function ImageCropper() {
       }
     },
     100,
-    [completedCrop, scale, rotate],
-  )
+    [completedCrop, scale, rotate]);
 
-  function handleToggleAspectClick() {
-    if (aspect) {
-      setAspect(undefined)
+  function handleChangeAspect(index?: number) {
+    const aspect = index === undefined ? undefined : aspects[index];
+
+    if (!aspect) {
+      setAspect(undefined);
     } else {
-      setAspect(16 / 9)
+      setAspect(aspect[0] / aspect[1]);
 
       if (imgRef.current) {
-        const { width, height } = imgRef.current
-        const newCrop = centerAspectCrop(width, height, 16 / 9)
-        setCrop(newCrop)
+        const { width, height } = imgRef.current,
+          realWidth = width - ((width / 100) * 5),
+          realHeight = height - ((height / 100) * 5);
+        const newCrop = centerAspectCrop(realWidth, realHeight, aspect[0] / aspect[1]);
+        setCrop(newCrop);
         // Updates the preview
-        setCompletedCrop(convertToPixelCrop(newCrop, width, height))
+        setCompletedCrop(convertToPixelCrop(newCrop, realWidth, realHeight));
       }
     }
   }
 
   return (
     <div className={styles.ImageCropper}>
-      <div className="Crop-Controls">
-        <input type="file" accept="image/*" onChange={onSelectFile} />
-        <div className='flex items-center justify-center flex-col gap-2'>
-          <div className='flex items-center gap-2'>
-            <label htmlFor="scale-input">
-              Scale:
-            </label>
-            <span
-              contentEditable='true'
-              onBlur={(e: any) => changeScale(e.target, e.target.textContent)}
-              /* onInput={(e: any) => {
-                if(e.nativeEvent.data !== '.' && isNaN(Number(e.nativeEvent.data))) {
-                  changeScale(e.target, e.target.textContent);
-                }
-              }} */
-              dangerouslySetInnerHTML={{__html: scale}}
-            />
-          </div>
+      <div className='flex items-center h-full overflow-hidden w-full justify-center gap-4 md:gap-8 max-w-[40rem]'>
+        {!!imgSrc && (
+          <>
+            <ReactCrop
+              crop={crop}
+              onChange={(_, percentCrop) => setCrop(percentCrop)}
+              onComplete={(c) => setCompletedCrop(c)}
+              aspect={aspect}
+              className='w-full h-full overflow-hidden'
+              // circularCrop
+            >
+              <img
+                ref={(e: any) => {
+                  if(e !== imgRef.current && !!e) {
+                    e.parentNode.style.height = e.parentNode.parentNode.clientHeight.toString() + 'px';
+                  }
+
+                  imgRef.current = e;
+                }}
+                alt="Crop me"
+                src={imgSrc}
+                className='w-full h-full flex-grow object-contain object-center'
+                // width={}
+                style={{
+                  transform: !(scale === initialScale && initialRotate === rotate) ? `scale(${scale}) rotate(${rotate}deg)` : undefined,
+                  // objectPosition: 'center top'
+                }}
+                onLoad={onImageLoad}
+              />
+            </ReactCrop>
+
+            {(!!completedCrop && false) && (
+              <>
+                  {<canvas
+                    ref={previewCanvasRef}
+                    style={{
+                      border: '0.06125rem solid black',
+                      objectFit: 'contain',
+                      width: '30%',
+                      minWidth: '30%',
+                      maxWidth: '30%'
+                      /* width: completedCrop.width,
+                      height: completedCrop.height, */
+                    }}
+                  />}
+                {/* <div>
+                  <button onClick={onDownloadCropClick}>Download Crop</button>
+                  <div style={{ fontSize: 12, color: '#666' }}>
+                    If you get a security error when downloading try opening the
+                    Preview in a new tab (icon near top right).
+                  </div>
+                  <a
+                    href="#hidden"
+                    ref={hiddenAnchorRef}
+                    download
+                    style={{
+                      position: 'absolute',
+                      top: '-200vh',
+                      visibility: 'hidden',
+                    }}
+                  >
+                    Hidden download
+                  </a>
+                </div> */}
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      <ul className='flex gap-2 flex-wrap'>
+        {aspects.map((asp: any, i: number) => (
+          <li>
+            <InputRadio
+              key = {i}
+              name = "image-cropper-aspect"
+              onChange={(e: any) => handleChangeAspect(i)}
+              checked={aspect === (aspects[i][0] / aspects[i][1])}
+            >
+              {asp[0]}:{asp[1]}
+            </InputRadio>
+          </li>
+        ))}
+
+        <InputRadio
+          name = "image-cropper-aspect"
+          onChange={(e: any) => handleChangeAspect()}
+          checked={aspect === undefined}
+        >
+          None
+        </InputRadio>
+      </ul>
+
+      <div className="Crop-Controls flex-shrink-0">
+        {/* <input type="file" accept="image/*" onChange={onSelectFile} /> */}
+        <div className='flex flex-col items-center justify-around md:flex-row gap-2 md:flex-shrink-0'>
           <div className='flex justify-center w-full max-w-80 items-center gap-4'>
             <Button
               IconName='Minus'
@@ -210,16 +337,39 @@ export default function ImageCropper() {
               }}
             />
 
-            <input
-              type="range"
-              value={scale}
-              min={minScale}
-              max={maxScale}
-              step={stepScale}
-              onChange={(e) => setScale(Number(e.target.value))}
-              className={styles["PB-range-slider"]}
-            />
+            <div className='w-full'>
+              <div className='flex items-center gap-2 justify-center font-bold'>
+                <span>
+                  Scale:
+                </span>
+                <span
+                  contentEditable='true'
+                  onKeyDown={(e: any) => {
+                    if(e.keyCode === 13) {
+                      e.preventDefault();
+                      e.target.blur();
+                    }
+                  }}
+                  onBlur={(e: any) => changeScale(e.target, e.target.textContent)}
+                  /* onInput={(e: any) => {
+                    if(e.nativeEvent.data !== '.' && isNaN(Number(e.nativeEvent.data))) {
+                      changeScale(e.target, e.target.textContent);
+                    }
+                  }} */
+                  dangerouslySetInnerHTML={{__html: scale}}
+                />
+              </div>
 
+              <input
+                type="range"
+                value={scale}
+                min={minScale}
+                max={maxScale}
+                step={stepScale}
+                onChange={(e) => setScale(Number(e.target.value))}
+                className={styles["PB-range-slider"]}
+              />
+            </div>
             <Button
               IconName='Plus'
               className='py-1 px-1.5'
@@ -230,83 +380,73 @@ export default function ImageCropper() {
               }}
             />
           </div>
-        </div>
-        <div>
-          <label htmlFor="rotate-input">Rotate: </label>
-          <input
-            id="rotate-input"
-            type="number"
-            value={rotate}
-            disabled={!imgSrc}
-            onChange={(e) =>
-              setRotate(Math.min(180, Math.max(-180, Number(e.target.value))))
-            }
-          />
-        </div>
-        <div>
-          <button onClick={handleToggleAspectClick}>
-            Toggle aspect {aspect ? 'off' : 'on'}
-          </button>
-        </div>
-      </div>
 
+          <div className='flex justify-center w-full max-w-80 items-center gap-4'>
+            <Button
+              IconName='Minus'
+              className='py-1 px-1.5'
+              onClick={() => {
+                let newRotate = rotate - stepRotate;
 
+                setRotate(newRotate < minRotate ? minRotate : newRotate);
+              }}
+            />
 
+            <div className='w-full'>
+              <div className='flex items-center gap-2 justify-center font-bold'>
+                <span>
+                  Rotate:
+                </span>
+                <span
+                  contentEditable='true'
+                  onKeyDown={(e: any) => {
+                    if(e.keyCode === 13) {
+                      e.preventDefault();
+                      e.target.blur();
+                    }
+                  }}
+                  onBlur={(e: any) => changeRotate(e.target, e.target.textContent)}
+                  dangerouslySetInnerHTML={{__html: rotate}}
+                />
+              </div>
 
+              <input
+                type="range"
+                value={rotate}
+                min={minRotate}
+                max={maxRotate}
+                step={stepRotate}
+                onChange={(e) => setRotate(Number(e.target.value))}
+                className={styles["PB-range-slider"]}
+              />
+            </div>
+            <Button
+              IconName='Plus'
+              className='py-1 px-1.5'
+              onClick={() => {
+                let newRotate = rotate + stepRotate;
 
-      {!!imgSrc && (
-        <ReactCrop
-          crop={crop}
-          onChange={(_, percentCrop) => setCrop(percentCrop)}
-          onComplete={(c) => setCompletedCrop(c)}
-          aspect={aspect}
-          // minWidth={400}
-          minHeight={100}
-          // circularCrop
-        >
-          <img
-            ref={imgRef}
-            alt="Crop me"
-            src={imgSrc}
-            style={{ transform: `scale(${scale}) rotate(${rotate}deg)` }}
-            onLoad={onImageLoad}
-          />
-        </ReactCrop>
-      )}
-      {!!completedCrop && (
-        <>
-          <div>
-            <canvas
-              ref={previewCanvasRef}
-              style={{
-                border: '1px solid black',
-                objectFit: 'contain',
-                width: completedCrop.width,
-                height: completedCrop.height,
+                setRotate(newRotate > maxRotate ? maxRotate : newRotate);
               }}
             />
           </div>
-          <div>
-            <button onClick={onDownloadCropClick}>Download Crop</button>
-            <div style={{ fontSize: 12, color: '#666' }}>
-              If you get a security error when downloading try opening the
-              Preview in a new tab (icon near top right).
-            </div>
-            <a
-              href="#hidden"
-              ref={hiddenAnchorRef}
-              download
-              style={{
-                position: 'absolute',
-                top: '-200vh',
-                visibility: 'hidden',
-              }}
-            >
-              Hidden download
-            </a>
-          </div>
-        </>
-      )}
+        </div>
+        {/* <div>
+          <button onClick={handleChangeAspect}>
+            Toggle aspect {aspect ? 'off' : 'on'}
+          </button>
+        </div> */}
+      </div>
+
+      <div className='flex items-center justify-center gap-4'>
+        <Button onClick = {closeModal}>
+          Cancel
+        </Button>
+
+        <Button onClick = {() => getUrl()}>
+          Accept
+        </Button>
+      </div>
     </div>
   )
 }
