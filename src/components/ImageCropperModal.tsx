@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import ImageCropper from "./ImageCropper";
 import { X } from "lucide-react";
 
-const ImageCropperModal = ({ urlImg, updateAvatar, closeModal }: any) => {
+const ImageCropperModal = ({ urlImg, onAccept, closeModal }: any) => {
   return createPortal((
     <div
       className="relative"
@@ -25,6 +25,7 @@ const ImageCropperModal = ({ urlImg, updateAvatar, closeModal }: any) => {
                     <X width={20} height={20} />
                 </button>
                 <ImageCropper
+                    onAccept = {onAccept}
                     urlImg = {urlImg}
                     closeModal={closeModal}
                     /* updateAvatar={updateAvatar}

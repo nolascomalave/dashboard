@@ -1,0 +1,21 @@
+@import '@/assets/scss/vars.module.scss';
+
+.login-page {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(135deg, $primary-layout 50%, $secondary-layout 50%);
+
+    & > svg {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 0;
+    }
+
+    /* *[class~="login-page__container__front-page"] {
+        background-color: rgba($primary-layout);
+    } */
+}

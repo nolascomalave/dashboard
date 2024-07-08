@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import ModalFooter from "@/layouts/UI/ModalFooter";
 import { ClientFetch } from "@/util/Fetching.js";
+import FormErrorMessage from "@/components/FormErrorMessage";
 
 import {
     Select,
@@ -22,7 +23,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { userSchema, genders } from "@/util/ValidationSchemas/userForm";
 import { useEffect, useState } from "react";
 import ImageCropSelector from "@/components/ImageCropSelector";
-import HandlerErrors from "@/util/HandlerErrors";
 
 type Inputs = {
     first_name: string;
@@ -48,22 +48,6 @@ const FormInputContainer = ({children}: {children: React.ReactNode}) => (
         {children}
     </div>
 );
-
-const ErrorMessage = ({children, className}: {children: React.ReactNode, className?: string}) => {
-    return (
-        <p
-            className={className}
-            style={{
-                color: 'rgb(220 38 38)',
-                marginTop: '0.5rem',
-                fontSize: '0.75rem',
-                lineHeight: '1'
-            }}
-        >
-            {children}
-        </p>
-    )
-}
 
 export default function UserForm({
     closeModal = () => undefined,
@@ -94,6 +78,8 @@ export default function UserForm({
 
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         const ftc = new ClientFetch();
+
+        console.log(data);
 
         /* const body = new FormData();
 
@@ -159,11 +145,12 @@ export default function UserForm({
                                     refference = {photoRegister.ref} */
                                     name="photo"
                                     onChange={(e: { target: { name: 'photo', files: FileList } }) => {
+                                        console.log(e.target.files[0]);
                                         setValue('photo', e.target.files[0]);
                                     }}
                                 />
                                 <Label htmlFor="photo" className="m-auto">Photo</Label>
-                                {errors.photo?.message && <ErrorMessage className="m-auto">{errors.photo?.message}</ErrorMessage>}
+                                {errors.photo?.message && <FormErrorMessage className="m-auto">{errors.photo?.message}</FormErrorMessage>}
                             </div>
                         </div>
 
@@ -175,7 +162,7 @@ export default function UserForm({
                                 {...register("first_name")}
                                 placeholder="Name"
                             />
-                            {errors.first_name?.message && <ErrorMessage>{errors.first_name?.message}</ErrorMessage>}
+                            {errors.first_name?.message && <FormErrorMessage>{errors.first_name?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -186,7 +173,7 @@ export default function UserForm({
                                 {...register("second_name")}
                                 placeholder="Name"
                             />
-                            {errors.second_name?.message && <ErrorMessage>{errors.second_name?.message}</ErrorMessage>}
+                            {errors.second_name?.message && <FormErrorMessage>{errors.second_name?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -197,7 +184,7 @@ export default function UserForm({
                                 {...register("first_surname")}
                                 placeholder="Surname"
                             />
-                            {errors.first_surname?.message && <ErrorMessage>{errors.first_surname?.message}</ErrorMessage>}
+                            {errors.first_surname?.message && <FormErrorMessage>{errors.first_surname?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -208,7 +195,7 @@ export default function UserForm({
                                 {...register("second_surname")}
                                 placeholder="Surname"
                             />
-                            {errors.second_surname?.message && <ErrorMessage>{errors.second_surname?.message}</ErrorMessage>}
+                            {errors.second_surname?.message && <FormErrorMessage>{errors.second_surname?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -233,7 +220,7 @@ export default function UserForm({
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-                            {errors.gender?.message && <ErrorMessage>{errors.gender?.message}</ErrorMessage>}
+                            {errors.gender?.message && <FormErrorMessage>{errors.gender?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -244,7 +231,7 @@ export default function UserForm({
                                 {...register("ssn")}
                                 placeholder="Social Security Number"
                             />
-                            {errors.ssn?.message && <ErrorMessage>{errors.ssn?.message}</ErrorMessage>}
+                            {errors.ssn?.message && <FormErrorMessage>{errors.ssn?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -255,7 +242,7 @@ export default function UserForm({
                                 {...register("email")}
                                 placeholder="Email"
                             />
-                            {errors.email?.message && <ErrorMessage>{errors.email?.message}</ErrorMessage>}
+                            {errors.email?.message && <FormErrorMessage>{errors.email?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -266,7 +253,7 @@ export default function UserForm({
                                 {...register("first_phone")}
                                 placeholder="Phone"
                             />
-                            {errors.first_phone?.message && <ErrorMessage>{errors.first_phone?.message}</ErrorMessage>}
+                            {errors.first_phone?.message && <FormErrorMessage>{errors.first_phone?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <FormInputContainer>
@@ -277,7 +264,7 @@ export default function UserForm({
                                 {...register("second_phone")}
                                 placeholder="Phone"
                             />
-                            {errors.second_phone?.message && <ErrorMessage>{errors.second_phone?.message}</ErrorMessage>}
+                            {errors.second_phone?.message && <FormErrorMessage>{errors.second_phone?.message}</FormErrorMessage>}
                         </FormInputContainer>
 
                         <div
@@ -293,7 +280,7 @@ export default function UserForm({
                                     minHeight: '5rem'
                                 }}
                             />
-                            {errors.address?.message && <ErrorMessage>{errors.address?.message}</ErrorMessage>}
+                            {errors.address?.message && <FormErrorMessage>{errors.address?.message}</FormErrorMessage>}
                         </div>
                     </div>
                 </div>

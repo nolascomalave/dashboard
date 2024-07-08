@@ -11,6 +11,7 @@ import { canvasPreview } from '@/util/setCanvasPreview';
 import { useDebounceEffect } from '@/hooks/useDebounceEffect';
 import styles from './ImageCropper.module.scss';
 import InputRadio from './InputRadio';
+import { createPortal } from 'react-dom';
 // Aspect Ratio:
 const aspects = [
   [1, 1],
@@ -49,7 +50,7 @@ export default function ImageCropper({
   urlImg,
   closeModal = () => null
 }: {
-  onAccept: (val: string) => void;
+  onAccept: (val: string, blob?: Blob) => void;
   urlImg: string;
   closeModal?: () => void
 }) {
@@ -95,6 +96,7 @@ export default function ImageCropper({
     const image = imgRef.current
     const previewCanvas = previewCanvasRef.current
     if (!image || !previewCanvas || !completedCrop) {
+      console.log(image, previewCanvas, completedCrop);
       throw new Error('Crop canvas does not exist')
     }
 
@@ -136,7 +138,7 @@ export default function ImageCropper({
     blobUrlRef.current = URL.createObjectURL(blob);
 
     if(!download && !!onAccept) {
-      onAccept(blobUrlRef.current);
+      onAccept(blobUrlRef.current, blob);
     }
 
     /* if (hiddenAnchorRef.current) {
@@ -238,7 +240,7 @@ export default function ImageCropper({
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               onComplete={(c) => setCompletedCrop(c)}
               aspect={aspect}
-              className='w-full h-full overflow-hidden'
+              className='h-full overflow-hidden'
               // circularCrop
             >
               <img
@@ -261,20 +263,23 @@ export default function ImageCropper({
               />
             </ReactCrop>
 
-            {(!!completedCrop && false) && (
+            {(!!completedCrop) && (
               <>
-                  {<canvas
+                  {createPortal(<canvas
                     ref={previewCanvasRef}
+                    className='fixed left-0 top-0'
                     style={{
+                      opacity: 0,
+                      zIndex: -1000,
                       border: '0.06125rem solid black',
                       objectFit: 'contain',
-                      width: '30%',
+                      /* width: '30%',
                       minWidth: '30%',
-                      maxWidth: '30%'
-                      /* width: completedCrop.width,
-                      height: completedCrop.height, */
+                      maxWidth: '30%' */
+                      width: completedCrop.width,
+                      height: completedCrop.height,
                     }}
-                  />}
+                  />, document.body)}
                 {/* <div>
                   <button onClick={onDownloadCropClick}>Download Crop</button>
                   <div style={{ fontSize: 12, color: '#666' }}>

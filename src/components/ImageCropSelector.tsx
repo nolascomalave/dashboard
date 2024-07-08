@@ -34,16 +34,20 @@ export default function ImageCropSelector({
     props: any;
 }) {
     const [originalImage, setOriginalImage]=useState(null),
-        [updatedImage, setUpdatedImage] = useState(null),
+        [updatedImage, setUpdatedImage] = useState<{url: string | null, blob: Blob | null}>({url: null, blob: null}),
         // [updatedSrcImage, setUpdatedSrcImage] = useState(null),
         [modalOpen, setModalOpen] = useState(false),
         inputRef = useRef();
 
     const chooseImage = () => inputRef.current.click();
 
-    const onChangeInput=({target}: {target: { name: string; files: {0: any, length: number} }}) => {
+    const onChangeInput=({target}: {target: { name: string; files: {0: any, length: number} }}, isUpdated?: boolean) => {
         if(onChange) {
             onChange({target});
+        }
+
+        if(isUpdated) {
+            return; // setUpdatedImage(url);
         }
 
         if(target.files && target.files.length>0){
@@ -51,11 +55,15 @@ export default function ImageCropSelector({
             reader.readAsDataURL(target.files[0]);
             reader.addEventListener('load', ()=>{
                 setOriginalImage(reader.result);
+                setUpdatedImage({url: null, blob: null});
             });
         }
     };
 
-    const onRemove = () => setOriginalImage(null);
+    const onRemove = () => {
+        setOriginalImage(null);
+        setUpdatedImage({url: null, blob: null});
+    };
 
     useEffect(() => {
         if(!originalImage && !!inputRef.current) {
@@ -68,6 +76,8 @@ export default function ImageCropSelector({
                     }
                 });
             }
+        } else if(originalImage) {
+            setModalOpen(true);
         }
     }, [originalImage]);
 
@@ -98,7 +108,7 @@ export default function ImageCropSelector({
                         />
                     ) : (
                         <img
-                            src={originalImage}
+                            src={updatedImage.url ?? originalImage}
                             className='w-full h-full rounded-full object-cover object-center'
                         />
                     )}
@@ -168,6 +178,22 @@ export default function ImageCropSelector({
 
             {modalOpen && (
                 <ImageCropperModal
+                    onAccept = {(url: string, blob: Blob) => {
+                        setUpdatedImage({
+                            url: url,
+                            blob: blob
+                        });
+                        onChangeInput({
+                            target: {
+                                name: name ?? '',
+                                files: {
+                                    length: 1,
+                                    0: blob
+                                }
+                            }
+                        }, true);
+                        setModalOpen(false);
+                    }}
                     urlImg = {originalImage}
                     // updateAvatar={updateAvatar}
                     closeModal={() => setModalOpen(false)}
