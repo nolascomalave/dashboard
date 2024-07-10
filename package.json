@@ -21,6 +21,7 @@
     "html-react-parser": "^5.1.10",
     "lucide-react": "^0.395.0",
     "next": "14.2.4",
+    "next-auth": "^4.24.7",
     "node-abort-controller": "^3.1.1",
     "react": "^18",
     "react-dom": "^18",

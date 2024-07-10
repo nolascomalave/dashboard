@@ -7,6 +7,8 @@ import AsideNavbarDetailOption from './AsideNavbarDetailOption';
 import clsx from 'clsx';
 import { useCounterStore } from "@/store/UIStore";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const menuData = [
     {
@@ -34,6 +36,7 @@ const menuData = [
 ];
 
 export default function AsideNavbar() {
+    const router = useRouter();
     const { sidebar } = useCounterStore(
         (state) => state
     );
@@ -140,7 +143,12 @@ export default function AsideNavbar() {
             ></div>
 
             <footer className='Navbar__footer flex-shrink-0'>
-                <button className="flex w-full items-center gap-2">
+                <button
+                    className="flex w-full items-center gap-2"
+                    onClick={() => signOut({
+                        redirect: false
+                    }).then(() => router.push('/login'))}
+                >
                     <LudiceIcons.LogOut width={18} height={18}/>
 
                     <p>

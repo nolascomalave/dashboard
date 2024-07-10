@@ -15,7 +15,22 @@
         z-index: 0;
     }
 
+
+
+    svg[class~="loading"] {
+        animation: rotation 1s infinite linear;
+    }
+
     /* *[class~="login-page__container__front-page"] {
         background-color: rgba($primary-layout);
     } */
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
 }

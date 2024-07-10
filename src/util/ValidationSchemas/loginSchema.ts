@@ -21,7 +21,7 @@ export const loginSchema = z.object({
         .max(250, {
             message: "Password must be less than 250 characters long.",
         }),
-    system_subscripton: z
+    id_system_subscription: z
         .number({
             required_error: 'Subscribed entity is required.',
         })

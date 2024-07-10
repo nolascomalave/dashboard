@@ -1,16 +1,15 @@
 'use client';
 
+import { signIn } from 'next-auth/react';
 import clsx from 'clsx';
 import styles from './login.module.scss';
-import vars from '@/assets/scss/vars.module.scss';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@/util/ValidationSchemas/loginSchema';
 import { Label } from '@radix-ui/react-dropdown-menu';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/Button';
-import { LogIn } from 'lucide-react';
+import { LoaderCircle, LogIn } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -20,25 +19,88 @@ import {
 } from "@/components/ui/select";
 import FormErrorMessage from '@/components/FormErrorMessage';
 import Image from 'next/image';
+import { ClientFetch } from '@/util/Fetching';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner'
 
 type LoginInputs = {
-    system_subscripton: number,
+    id_system_subscription: number,
     username: string,
     password: string
 };
 
+const aliases = {
+    id_system_subscription: 'Entity ID',
+    username: 'Username',
+    password: 'Password'
+}
+
 export default function Login() {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const {
             register,
             handleSubmit,
-            /* setValue,
             setError,
+            getValues,
+            control,
+            /* setValue,
             getValues, */
-            formState: { errors },
+            formState: { errors }
         } = useForm<LoginInputs>({
             resolver: zodResolver(loginSchema),
         }),
-        entityRegister = register('system_subscripton');
+        entityRegister = register('id_system_subscription', {disabled: isLoading});
+
+    const onSubmit: SubmitHandler<LoginInputs> = async (inputs) => {
+        setIsLoading(true);
+        const ftc = new ClientFetch();
+
+        try {
+
+            const response = await signIn('credentials',
+                {
+                    ...inputs,
+                    redirect: false,
+                }
+            );
+
+            setIsLoading(false);
+
+            if (!response?.error) {
+                return router.push('/dashboard');
+            }
+
+            if(response.status === 500) {
+                throw response;
+            }
+
+            if(response.status === 401) {
+                const errorsResponse = JSON.parse(response.error).message;
+                let fields: any = {};
+
+                // await clearErrors();
+
+                errorsResponse.forEach((err: string) => {
+                    const field = err.split(' ')[0];
+
+                    if(field in fields) {
+                        return;
+                    }
+
+                    fields[field] = (aliases[field] ?? '').concat(' ' + err.split(' ').slice(1).join(' ')).trim();
+                });
+
+                Object.keys(fields).forEach((field: string) => setError(field, {message: fields[field]}));
+            }
+
+        } catch(e: any) {
+            toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left'
+            });
+        }
+    };
 
     return (
         <main
@@ -86,10 +148,13 @@ export default function Login() {
                         </header>
                     </div>
 
-                    <div className='login-page__container__form h-full sm:h-auto backdrop-blur-sm sm:backdrop-blur-none sm:bg-white text-primary_color sm:rounded-l-sm flex items-center justify-center px-8 py-12 sm:w-[50%] sm:text-primary_layout'>
+                    <div className='login-page__container__form h-full sm:h-auto backdrop-blur-sm sm:backdrop-blur-none sm:bg-fond text-primary_color sm:rounded-l-sm flex items-center justify-center px-8 py-12 sm:w-[50%] sm:text-primary_layout'>
                         <form
                             className='max-w-60 text-center w-full'
-                            onSubmit={handleSubmit((data: any) => console.log(data))}
+                            onSubmit={(e: any) => {
+                                console.log(getValues());
+                                handleSubmit(onSubmit)(e);
+                            }}
                         >
                             <h2 className='text-xl'>Login</h2>
                             {/* <h2 className='text-3xl'>IRMS</h2>
@@ -98,34 +163,44 @@ export default function Login() {
                             <div className='flex flex-col gap-4 text-left mt-8 mb-4'>
                                 <div className="w-full items-center gap-1.5">
                                     <Label>Subscribed Entity</Label>
-                                    <Select
-                                        name={entityRegister.name}
-                                        disabled={entityRegister.disabled}
-                                        required={entityRegister.required}
-                                        onValueChange={(val: string) => entityRegister.onChange({target: {name: 'system_subscripton', value: Number(val)}})}
-                                    >
-                                        <SelectTrigger id="gender" className="w-full">
-                                            <SelectValue placeholder="Select an entity" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value={'1'}>New Evolution</SelectItem>
-                                            {/* {Object.keys(genders).map((el: string, i: number) => {
-                                                return (
-                                                    <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
-                                                );
-                                            })} */}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.system_subscripton?.message && <FormErrorMessage>{errors.system_subscripton?.message}</FormErrorMessage>}
+
+                                    <Controller
+                                        control={control}
+                                        name="id_system_subscription"
+                                        render={({ field }) => {
+                                            const {ref, ...fieldProps} = field;
+                                            return (
+                                                <Select
+                                                    onValueChange={(val: string) => entityRegister.onChange({target: {name: 'id_system_subscription', value: Number(val)}})}
+                                                    {...fieldProps}
+                                                    /* {...entityRegister}
+                                                    value={system_subscription_value.toString()}
+                                                    onValueChange={(val: string) => setSystem_subscription_value(Number(val))} */
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Select an entity" ref={ref} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value={'1'}>New Evolution</SelectItem>
+                                                        {/* {Object.keys(genders).map((el: string, i: number) => {
+                                                            return (
+                                                                <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
+                                                            );
+                                                        })} */}
+                                                    </SelectContent>
+                                                </Select>
+                                            )
+                                        }}
+                                    ></Controller>
+                                    {errors.id_system_subscription?.message && <FormErrorMessage>{errors.id_system_subscription?.message}</FormErrorMessage>}
                                 </div>
 
                                 <div className="w-full items-center gap-1.5">
                                     <Label>Username</Label>
                                     <Input
-                                        className='sm:bg-fond'
                                         type="string"
                                         id="first_name"
-                                        {...register("username")}
+                                        {...register("username", {disabled: isLoading})}
                                         placeholder="Username"
                                     />
                                     {errors.username?.message && <FormErrorMessage>{errors.username?.message}</FormErrorMessage>}
@@ -134,10 +209,9 @@ export default function Login() {
                                 <div className="w-full items-center gap-1.5">
                                     <Label>Password</Label>
                                     <Input
-                                        className='sm:bg-fond'
                                         type="password"
                                         id="first_name"
-                                        {...register("password")}
+                                        {...register("password", {disabled: isLoading})}
                                         placeholder="Password"
                                     />
                                     {errors.password?.message && <FormErrorMessage>{errors.password?.message}</FormErrorMessage>}
@@ -147,10 +221,23 @@ export default function Login() {
                             <div>
                                 <Button
                                     type="submit"
-                                    className='m-auto'
+                                    className={clsx({
+                                        'm-auto': true,
+                                        'opacity-50': isLoading
+                                    })}
+                                    disabled={isLoading}
                                 >
                                     Login
-                                    <LogIn width={20} height={20}/>
+
+                                    {isLoading ? (
+                                        <LoaderCircle
+                                            className='loading'
+                                            width={20}
+                                            height={20}
+                                        />
+                                    ) : (
+                                        <LogIn width={20} height={20}/>
+                                    )}
                                 </Button>
                             </div>
                         </form>
