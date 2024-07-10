@@ -22,10 +22,18 @@ export const loginSchema = z.object({
             message: "Password must be less than 250 characters long.",
         }),
     id_system_subscription: z
-        .number({
-            required_error: 'Subscribed entity is required.',
+        .string({
+            required_error: 'Subscribed entity is required.'
         })
-        .int({
-            message: 'Subscribed entity ID must be an integer number.'
-        })
+        .transform((val) => Number(val))
+        .pipe(
+            z
+            .number({
+                message: 'Subscribed entity is not a number',
+                required_error: 'Subscribed entity is required.',
+            })
+            .int({
+                message: 'Subscribed entity ID must be an integer number.'
+            })
+        )
 });

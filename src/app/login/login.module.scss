@@ -15,7 +15,40 @@
         z-index: 0;
     }
 
+    /* select {
+        -moz-appearance:none;
+        -webkit-appearance:none;
+        appearance:none;
+    } */
 
+    select {
+        /* background-image: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: calc(100% - 0.5em) center !important;
+        -moz-appearance:none !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        padding-right: 2rem !important; */
+
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: transparent;
+        background-color: white;
+        background-repeat: no-repeat;
+        background-position: calc(100% - 0.5em) center !important;
+        background-image: url("data:image/svg+xml,<svg height='10px' width='10px' opacity='0.3' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+        color: rgba($primary-layout, 0.75);
+
+        /* &:has(option:checked:disabled) {
+            background-image: url("data:image/svg+xml,<svg height='10px' width='10px' opacity='0.3' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+            color: rgba(black, 0.5)
+        } */
+
+        &:has(option:checked:not(:disabled)), &:focus {
+            background-image: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+            color: inherit;
+        }
+    }
 
     svg[class~="loading"] {
         animation: rotation 1s infinite linear;

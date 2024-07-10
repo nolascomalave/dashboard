@@ -3,20 +3,22 @@
 import { signIn } from 'next-auth/react';
 import clsx from 'clsx';
 import styles from './login.module.scss';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@/util/ValidationSchemas/loginSchema';
 import { Label } from '@radix-ui/react-dropdown-menu';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/Button';
 import { LoaderCircle, LogIn } from 'lucide-react';
-import {
+/* import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
+    SelectLabel,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"; */
 import FormErrorMessage from '@/components/FormErrorMessage';
 import Image from 'next/image';
 import { ClientFetch } from '@/util/Fetching';
@@ -75,12 +77,18 @@ export default function Login() {
             if(response.status === 500) {
                 throw response;
             }
+            console.log(response);
 
             if(response.status === 401) {
                 const errorsResponse = JSON.parse(response.error).message;
-                let fields: any = {};
 
-                // await clearErrors();
+                if(!Array.isArray(errorsResponse)) {
+                    return setError('password', {
+                        message: 'Username or password incorrect.'
+                    });
+                }
+
+                let fields: any = {};
 
                 errorsResponse.forEach((err: string) => {
                     const field = err.split(' ')[0];
@@ -96,6 +104,7 @@ export default function Login() {
             }
 
         } catch(e: any) {
+            console.log(e);
             toast.error('An unexpected error has occurred.', {
                 position: 'bottom-left'
             });
@@ -151,10 +160,7 @@ export default function Login() {
                     <div className='login-page__container__form h-full sm:h-auto backdrop-blur-sm sm:backdrop-blur-none sm:bg-fond text-primary_color sm:rounded-l-sm flex items-center justify-center px-8 py-12 sm:w-[50%] sm:text-primary_layout'>
                         <form
                             className='max-w-60 text-center w-full'
-                            onSubmit={(e: any) => {
-                                console.log(getValues());
-                                handleSubmit(onSubmit)(e);
-                            }}
+                            onSubmit={handleSubmit(onSubmit)}
                         >
                             <h2 className='text-xl'>Login</h2>
                             {/* <h2 className='text-3xl'>IRMS</h2>
@@ -164,34 +170,31 @@ export default function Login() {
                                 <div className="w-full items-center gap-1.5">
                                     <Label>Subscribed Entity</Label>
 
-                                    <Controller
-                                        control={control}
-                                        name="id_system_subscription"
-                                        render={({ field }) => {
-                                            const {ref, ...fieldProps} = field;
-                                            return (
-                                                <Select
-                                                    onValueChange={(val: string) => entityRegister.onChange({target: {name: 'id_system_subscription', value: Number(val)}})}
-                                                    {...fieldProps}
-                                                    /* {...entityRegister}
-                                                    value={system_subscription_value.toString()}
-                                                    onValueChange={(val: string) => setSystem_subscription_value(Number(val))} */
-                                                >
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Select an entity" ref={ref} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value={'1'}>New Evolution</SelectItem>
-                                                        {/* {Object.keys(genders).map((el: string, i: number) => {
-                                                            return (
-                                                                <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
-                                                            );
-                                                        })} */}
-                                                    </SelectContent>
-                                                </Select>
-                                            )
-                                        }}
-                                    ></Controller>
+                                    <select
+                                        className='flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1'
+                                        {...entityRegister}
+                                        defaultValue={''}
+                                    >
+                                        <option disabled value={''}>Select...</option>
+                                        <option value={1}>
+                                            New Evolution
+                                        </option>
+                                    </select>
+
+                                    {/* <Select
+                                        onValueChange={(val: string) => entityRegister.onChange({target: {name: 'id_system_subscription', value: Number(val)}})}
+                                        {...entityRegister}
+                                    >
+                                        <SelectTrigger id="gender" className="w-full">
+                                            <SelectValue placeholder="Select a Entity" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Gender</SelectLabel>
+                                                <SelectItem value={'1'}>New Evolution</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select> */}
                                     {errors.id_system_subscription?.message && <FormErrorMessage>{errors.id_system_subscription?.message}</FormErrorMessage>}
                                 </div>
 
@@ -199,7 +202,6 @@ export default function Login() {
                                     <Label>Username</Label>
                                     <Input
                                         type="string"
-                                        id="first_name"
                                         {...register("username", {disabled: isLoading})}
                                         placeholder="Username"
                                     />
@@ -210,7 +212,6 @@ export default function Login() {
                                     <Label>Password</Label>
                                     <Input
                                         type="password"
-                                        id="first_name"
                                         {...register("password", {disabled: isLoading})}
                                         placeholder="Password"
                                     />

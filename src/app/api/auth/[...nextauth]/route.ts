@@ -6,12 +6,20 @@ import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshToken(token: JWT): Promise<JWT> {
-  const res = await fetch(process.env.API + "/auth/refresh", {
-    method: "POST",
+  const ftc = new ClientFetch();
+
+  const res = await ftc.post({
+    url: process.env.API + "/auth/refresh",
     headers: {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
   });
+  /* const res = await fetch(process.env.API + "/auth/refresh", {
+    method: "POST",
+    headers: {
+      authorization: `Refresh ${token.backendTokens.refreshToken}`,
+    },
+  }); */
   console.log("refreshed");
 
   const response = await res.json();
@@ -58,27 +66,28 @@ export const authOptions: NextAuthOptions = {
             url: process.env.API + "/auth/login",
             method: "POST",
             data: {
-                /* username,
+                username,
                 password,
-                id_system_subscription: Number(id_system_subscription) */
-            },
-            /* headers: {
-                "Content-Type": "application/json",
-            }, */
+                id_system_subscription: Number(id_system_subscription)
+            }
         });
 
-        if (res.status !== 500) {
-            const response = await res.json();
-            throw new Error(JSON.stringify(response));
+        if(res.status === 500) {
+          throw new Error('Unknown error.');
         }
 
-        const { user } = await res.json();
-        return user;
+        const response = await res.json();
+
+        if(res.status !== 200) {
+          throw new Error(JSON.stringify(response));
+        }
+
+        return response.user;
       },
     }),
   ],
 
-  /* callbacks: {
+  callbacks: {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
 
@@ -88,13 +97,13 @@ export const authOptions: NextAuthOptions = {
       return await refreshToken(token);
     },
 
-    async session({ token, session }) {
+    /* async session({ token, session }) {
       session.user = token.user;
       session.backendTokens = token.backendTokens;
 
       return session;
-    },
-  }, */
+    }, */
+  },
 };
 
 const handler = NextAuth(authOptions);
