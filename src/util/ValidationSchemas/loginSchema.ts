@@ -25,6 +25,9 @@ export const loginSchema = z.object({
         .string({
             required_error: 'Subscribed entity is required.'
         })
+        .min(1, {
+            message: 'Subscribed entity is required.'
+        })
         .transform((val) => Number(val))
         .pipe(
             z
@@ -34,6 +37,9 @@ export const loginSchema = z.object({
             })
             .int({
                 message: 'Subscribed entity ID must be an integer number.'
+            })
+            .min(1, {
+                message: '/* Subscribed entity ID must be greater than 0. */'
             })
         )
 });

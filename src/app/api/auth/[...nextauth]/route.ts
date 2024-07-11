@@ -14,13 +14,6 @@ async function refreshToken(token: JWT): Promise<JWT> {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
   });
-  /* const res = await fetch(process.env.API + "/auth/refresh", {
-    method: "POST",
-    headers: {
-      authorization: `Refresh ${token.backendTokens.refreshToken}`,
-    },
-  }); */
-  console.log("refreshed");
 
   const response = await res.json();
 
@@ -31,32 +24,15 @@ async function refreshToken(token: JWT): Promise<JWT> {
 }
 
 export const authOptions: NextAuthOptions = {
-    /* session: {
-        strategy: 'jwt',
-    },
-    pages: {
-        signIn: '/login',
-    }, */
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: {
-          /* label: "Username",
-          type: "text",
-          placeholder: "Username", */
-        },
-        password: {
-            /* label: "Password",
-            type: "password" */
-        },
-        id_system_subscription: {
-            /* label: 'Subscribed entity',
-            type: 'number' */
-        }
+        username: {},
+        password: {},
+        id_system_subscription: {}
       },
       async authorize(credentials, req) {
-        console.log('Coño de la madre.');
         if (!credentials?.username || !credentials?.password || !credentials?.id_system_subscription) return null;
         const { username, password, id_system_subscription } = credentials;
 
@@ -68,7 +44,8 @@ export const authOptions: NextAuthOptions = {
             data: {
                 username,
                 password,
-                id_system_subscription: Number(id_system_subscription)
+                id_system_subscription: Number(id_system_subscription),
+                id_system: Number(process.env.id_system)
             }
         });
 
@@ -82,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error(JSON.stringify(response));
         }
 
-        return response.user;
+        return response;
       },
     }),
   ],
@@ -97,12 +74,12 @@ export const authOptions: NextAuthOptions = {
       return await refreshToken(token);
     },
 
-    /* async session({ token, session }) {
+    async session({ token, session }) {
       session.user = token.user;
       session.backendTokens = token.backendTokens;
 
       return session;
-    }, */
+    },
   },
 };
 

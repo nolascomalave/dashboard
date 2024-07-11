@@ -1,15 +1,14 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from 'next-auth';
 import AsideNavbar from '@/layouts/AsideNavbar';
 import { redirect } from 'next/navigation';
 
 export default async function Layout({ children, usersModals }: { children: React.ReactNode, usersModals: React.ReactNode }) {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
 
     if(!session) {
         redirect('/login');
     }
-
-    console.log(session);
 
     return (
         <main className='flex h-lvh'>

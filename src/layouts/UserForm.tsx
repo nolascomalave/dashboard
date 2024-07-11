@@ -76,18 +76,87 @@ export default function UserForm({
         genderRegister = register("gender");
 
 
-    const onSubmit: SubmitHandler<Inputs> = async (data) => {
-        const ftc = new ClientFetch();
+    const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
+        const ftc = new ClientFetch(),
+            data = new FormData();
+        let names = [],
+            phones = [];
 
-        console.log(data);
 
-        /* const body = new FormData();
+        names.push({
+            name: inputs.first_name,
+            id_entity_name_type: 1,
+            order: 1
+        });
 
-        Object.keys(data).forEach(el => body.append(el, data[el])); */
+        if((inputs.second_name ?? '').trim().length > 0) {
+            names.push({
+                name: inputs.second_name,
+                id_entity_name_type: 1,
+                order: 2
+            });
+        }
+
+        names.push({
+            name: inputs.first_surname,
+            id_entity_surname_type: 2,
+            order: 1
+        });
+
+        if((inputs.second_surname ?? '').trim().length > 0) {
+            names.push({
+                name: inputs.second_surname,
+                id_entity_surname_type: 2,
+                order: 2
+            });
+        }
+
+        data.append('names', JSON.stringify(names));
+
+        phones.push({
+            phone: inputs.first_phone,
+            order: 1
+        });
+
+        if((inputs.second_phone ?? '').toString().trim().length > 0) {
+            phones.push({
+                phone: inputs.second_phone,
+                order: 2
+            });
+        }
+
+        data.append('phones', JSON.stringify(phones));
+
+        data.append('emails', JSON.stringify([{
+            phone: inputs.email,
+            order: 1
+        }]));
+
+        data.append('documents', JSON.stringify([{
+            document: inputs.ssn,
+            id_entity_document_category: 1,
+            order: 1
+        }]));
+
+        data.append('gender', inputs.gender);
+
+        data.append('address', inputs.address);
+
+        if(!!inputs.photo) {
+            data.append('photo', inputs.photo);
+        }
+
+        /* let newData: {[key: string]: any} = {};
+
+        for (const key of data.keys()) {
+            newData[key] = data.get(key);
+        }
+
+        delete newData.photo; */
 
         try {
             const response = await ftc.post({
-                url: `${process.env.API}/system-subscription-users/add`,
+                url: `${process.env.API}/system-subscription-users`,
                 data: data
             });
 

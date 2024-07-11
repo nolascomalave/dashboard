@@ -23,14 +23,15 @@ import FormErrorMessage from '@/components/FormErrorMessage';
 import Image from 'next/image';
 import { ClientFetch } from '@/util/Fetching';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner'
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 type LoginInputs = {
     id_system_subscription: number,
     username: string,
     password: string
 };
+type LoginInputsKeys = keyof LoginInputs;
 
 const aliases = {
     id_system_subscription: 'Entity ID',
@@ -46,9 +47,8 @@ export default function Login() {
             handleSubmit,
             setError,
             getValues,
-            control,
-            /* setValue,
-            getValues, */
+            /* control,
+            setValue, */
             formState: { errors }
         } = useForm<LoginInputs>({
             resolver: zodResolver(loginSchema),
@@ -77,7 +77,6 @@ export default function Login() {
             if(response.status === 500) {
                 throw response;
             }
-            console.log(response);
 
             if(response.status === 401) {
                 const errorsResponse = JSON.parse(response.error).message;
@@ -100,13 +99,20 @@ export default function Login() {
                     fields[field] = (aliases[field] ?? '').concat(' ' + err.split(' ').slice(1).join(' ')).trim();
                 });
 
-                Object.keys(fields).forEach((field: string) => setError(field, {message: fields[field]}));
+                const fieldsKey = Object.keys(fields);
+
+                if(Object.keys(inputs).some((key: string) => fieldsKey.includes(key))) {
+                    fieldsKey.forEach((field: string) => setError(field, {message: fields[field]}));
+                } else {
+                    throw 'error';
+                }
             }
 
         } catch(e: any) {
-            console.log(e);
             toast.error('An unexpected error has occurred.', {
-                position: 'bottom-left'
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
             });
         }
     };
