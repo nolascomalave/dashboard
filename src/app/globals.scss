@@ -115,3 +115,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.loading-circle {
+  animation: rotation-circle 1s infinite linear;
+}
+
+@keyframes rotation-circle {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(359deg);
+  }
+}

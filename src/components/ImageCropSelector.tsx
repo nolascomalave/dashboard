@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from './ui/label';
 import ImageCropperModal from './ImageCropperModal';
+import ImageViewer from './ImageViewer';
 
 export default function ImageCropSelector({
     name,
@@ -36,7 +37,8 @@ export default function ImageCropSelector({
     const [originalImage, setOriginalImage]=useState(null),
         [updatedImage, setUpdatedImage] = useState<{url: string | null, blob: Blob | null}>({url: null, blob: null}),
         // [updatedSrcImage, setUpdatedSrcImage] = useState(null),
-        [modalOpen, setModalOpen] = useState(false),
+        [modalOpen, setModalOpen] = useState<boolean>(false),
+        [isOpenViewer, setIsOpenViewer] = useState<boolean>(false),
         inputRef = useRef();
 
     const chooseImage = () => inputRef.current.click();
@@ -98,7 +100,7 @@ export default function ImageCropSelector({
                 <button
                     className='w-16 h-16 flex items-center justify-center duration-150 rounded-full border-2 box-border border-primary_layout text-primary_layout opacity-60 hover:opacity-100 focus:opacity-100'
                     type='button'
-                    onClick={chooseImage}
+                    onClick={!originalImage ? chooseImage : () => setIsOpenViewer(true)}
                 >
                     {!originalImage ? (
                         <Icon
@@ -175,6 +177,13 @@ export default function ImageCropSelector({
                     : inputRef.current.files[0].name
                 }
             </Label>
+
+            {(isOpenViewer && originalImage) && (
+                <ImageViewer
+                    src = {updatedImage.url ?? originalImage}
+                    closeModal = {() => setIsOpenViewer(false)}
+                />
+            )}
 
             {modalOpen && (
                 <ImageCropperModal

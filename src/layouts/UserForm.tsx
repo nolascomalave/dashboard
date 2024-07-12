@@ -1,5 +1,6 @@
 'use client';
 // import { InputWithLabel } from "@/components/InputWithLabel";
+import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // import { useFormik } from 'formik';
@@ -9,6 +10,8 @@ import clsx from "clsx";
 import ModalFooter from "@/layouts/UI/ModalFooter";
 import { ClientFetch } from "@/util/Fetching.js";
 import FormErrorMessage from "@/components/FormErrorMessage";
+import { useRouter } from "next/navigation";
+import { toast } from 'sonner';
 
 import {
     Select,
@@ -60,7 +63,10 @@ export default function UserForm({
     isModal: boolean,
     props?: any[]
 }) {
-    const [formID, setFormID] = useState<undefined | string>(undefined),
+    const { data: session } = useSession(),
+        router = useRouter(),
+        [formID, setFormID] = useState<undefined | string>(undefined),
+        [isLoading, setIsLoading] = useState<boolean>(false),
         {
             register,
             handleSubmit,
@@ -68,7 +74,6 @@ export default function UserForm({
             watch, */
             setValue,
             setError,
-            getValues,
             formState: { errors },
         } = useForm<Inputs>({
             resolver: zodResolver(userSchema),
@@ -77,11 +82,43 @@ export default function UserForm({
 
 
     const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
+        setIsLoading(true);
+
         const ftc = new ClientFetch(),
             data = new FormData();
         let names = [],
-            phones = [];
+            phones = [],
+            inputFields: { [key: string]: null | {field: string; alias: string}} = {
+                'names.0': {
+                    field: 'first_name',
+                    alias: 'First name'
+                },
+                'phones.0': {
+                    field: 'first_phone',
+                    alias: 'First phone'
+                },
+                ...((inputs.second_phone ?? '').toString().trim().length > 0 ? {
+                    'phones.1': {
+                        field: 'second_phone',
+                        alias: 'Second phone'
+                    }
+                } : {}),
+                'emails.0': {
+                    field: 'mail',
+                    alias: 'Email'
+                },
+                'documents.0': {
+                    field: 'ssn',
+                    alias: 'Social security number'
+                },
+                'gender': null,
+                'address': null,
+                'photo': null
+            };
 
+        if(!!inputs.photo) {
+            data.append('photo', inputs.photo);
+        }
 
         names.push({
             name: inputs.first_name,
@@ -95,6 +132,11 @@ export default function UserForm({
                 id_entity_name_type: 1,
                 order: 2
             });
+
+            inputFields['names.1'] = {
+                field: 'second_name',
+                alias: 'Second name'
+            };
         }
 
         names.push({
@@ -103,15 +145,33 @@ export default function UserForm({
             order: 1
         });
 
+        inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.2' : 'names.1'] = {
+            field: 'first_surname',
+            alias: 'First surname'
+        };
+
         if((inputs.second_surname ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_surname,
                 id_entity_surname_type: 2,
                 order: 2
             });
+
+            inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.3' : 'names.2'] = {
+                field: 'second_surname',
+                alias: 'Second surname'
+            };
         }
 
         data.append('names', JSON.stringify(names));
+
+        data.append('gender', inputs.gender);
+
+        data.append('documents', JSON.stringify([{
+            document: inputs.ssn,
+            id_entity_document_category: 1,
+            order: 1
+        }]));
 
         phones.push({
             phone: inputs.first_phone,
@@ -132,19 +192,7 @@ export default function UserForm({
             order: 1
         }]));
 
-        data.append('documents', JSON.stringify([{
-            document: inputs.ssn,
-            id_entity_document_category: 1,
-            order: 1
-        }]));
-
-        data.append('gender', inputs.gender);
-
         data.append('address', inputs.address);
-
-        if(!!inputs.photo) {
-            data.append('photo', inputs.photo);
-        }
 
         /* let newData: {[key: string]: any} = {};
 
@@ -155,18 +203,64 @@ export default function UserForm({
         delete newData.photo; */
 
         try {
-            const response = await ftc.post({
+            const res = await ftc.post({
                 url: `${process.env.API}/system-subscription-users`,
-                data: data
+                data: data,
+                headers: {
+                    authorization: `Bearer ${session?.backendTokens.accessToken}`
+                },
             });
 
-            if(response.status !== 201) {
-                throw response.status;
-            }
+            setIsLoading(false);
 
-            console.log(await response.json());
+            switch(res.status) {
+                case 401:
+                    return router.push('/login');
+                case 400:
+                case 201:
+                    const response = await res.json();
+
+                    if(res.status === 400) {
+
+                        let fields: any = {};
+
+                        response.message.forEach((err: string) => {
+                            const field = err.split(' ')[0],
+                                alias = inputFields[field] !== null ? inputFields[field].alias : null;
+
+                            if(field in fields) {
+                                return;
+                            }
+
+                            fields[field] = (alias ?? '').concat(' ' + err.split(' ').slice(1).join(' ')).trim();
+                        });
+
+                        const fieldsKey = Object.keys(fields);
+
+                        if(Object.keys(inputFields).some((key: string) => fieldsKey.includes(key))) {
+                            fieldsKey.forEach((field: string) => setError(inputFields[field] === null ? field : inputFields[field].field, {message: fields[field]}));
+                        } else {
+                            throw 'error';
+                        }
+                    } else {
+                        toast.success(`User was created`, {
+                            position: 'bottom-right',
+                            closeButton: true,
+                        });
+                    }
+                    break;
+                case 500:
+                default:
+                    throw 'error';
+            }
         } catch(e: any) {
-            console.log(e);
+            setIsLoading(false);
+            /* toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
+            }); */
+            throw 'An unexpected error has occurred.';
         }
     };
 
@@ -179,7 +273,13 @@ export default function UserForm({
             <form
                 id={formID}
                 className="Modal__content__body"
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(async (data) => {
+                    toast.promise(onSubmit(data), {
+                        loading: 'Creating User...',
+                        // success: () => `User was created`,
+                        error: (error: string) => error,
+                    });
+                })}
             >
                 <div
                     {...props}
@@ -228,7 +328,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="first_name"
-                                {...register("first_name")}
+                                {...register("first_name", {disabled: isLoading})}
                                 placeholder="Name"
                             />
                             {errors.first_name?.message && <FormErrorMessage>{errors.first_name?.message}</FormErrorMessage>}
@@ -239,7 +339,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="second_name"
-                                {...register("second_name")}
+                                {...register("second_name", {disabled: isLoading})}
                                 placeholder="Name"
                             />
                             {errors.second_name?.message && <FormErrorMessage>{errors.second_name?.message}</FormErrorMessage>}
@@ -250,7 +350,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="first_surname"
-                                {...register("first_surname")}
+                                {...register("first_surname", {disabled: isLoading})}
                                 placeholder="Surname"
                             />
                             {errors.first_surname?.message && <FormErrorMessage>{errors.first_surname?.message}</FormErrorMessage>}
@@ -261,7 +361,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="second_surname"
-                                {...register("second_surname")}
+                                {...register("second_surname", {disabled: isLoading})}
                                 placeholder="Surname"
                             />
                             {errors.second_surname?.message && <FormErrorMessage>{errors.second_surname?.message}</FormErrorMessage>}
@@ -297,7 +397,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="ssn"
-                                {...register("ssn")}
+                                {...register("ssn", {disabled: isLoading})}
                                 placeholder="Social Security Number"
                             />
                             {errors.ssn?.message && <FormErrorMessage>{errors.ssn?.message}</FormErrorMessage>}
@@ -308,7 +408,7 @@ export default function UserForm({
                             <Input
                                 type="email"
                                 id="email"
-                                {...register("email")}
+                                {...register("email", {disabled: isLoading})}
                                 placeholder="Email"
                             />
                             {errors.email?.message && <FormErrorMessage>{errors.email?.message}</FormErrorMessage>}
@@ -319,7 +419,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="first_phone"
-                                {...register("first_phone")}
+                                {...register("first_phone", {disabled: isLoading})}
                                 placeholder="Phone"
                             />
                             {errors.first_phone?.message && <FormErrorMessage>{errors.first_phone?.message}</FormErrorMessage>}
@@ -330,7 +430,7 @@ export default function UserForm({
                             <Input
                                 type="string"
                                 id="second_phone"
-                                {...register("second_phone")}
+                                {...register("second_phone", {disabled: isLoading})}
                                 placeholder="Phone"
                             />
                             {errors.second_phone?.message && <FormErrorMessage>{errors.second_phone?.message}</FormErrorMessage>}
@@ -342,7 +442,7 @@ export default function UserForm({
                             <Label htmlFor="address">Address</Label>
                             <Textarea
                                 id="address"
-                                {...register("address")}
+                                {...register("address", {disabled: isLoading})}
                                 placeholder="Address"
                                 rows={3}
                                 style={{
@@ -364,7 +464,8 @@ export default function UserForm({
                 >
                     <button
                         type="button"
-                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
+                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded disabled:border disabled:border-input disabled:text-input disabled:bg-transparent"
+                        disabled={isLoading}
                         onClick={closeModal}
                     >
                         Cancel
@@ -372,7 +473,8 @@ export default function UserForm({
                     <button
                         type="submit"
                         form={formID}
-                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
+                        className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded disabled:border disabled:border-input disabled:text-input disabled:bg-transparent"
+                        disabled={isLoading}
                     >
                         Accept
                     </button>

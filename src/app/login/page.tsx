@@ -46,8 +46,8 @@ export default function Login() {
             register,
             handleSubmit,
             setError,
-            getValues,
-            /* control,
+            /* getValues,
+            control,
             setValue, */
             formState: { errors }
         } = useForm<LoginInputs>({
@@ -109,6 +109,7 @@ export default function Login() {
             }
 
         } catch(e: any) {
+            setIsLoading(false);
             toast.error('An unexpected error has occurred.', {
                 position: 'bottom-left',
                 closeButton: true,

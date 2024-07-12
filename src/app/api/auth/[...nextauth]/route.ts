@@ -10,6 +10,7 @@ async function refreshToken(token: JWT): Promise<JWT> {
 
   const res = await ftc.post({
     url: process.env.API + "/auth/refresh",
+    data: token.user,
     headers: {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
