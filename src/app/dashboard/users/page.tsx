@@ -46,7 +46,7 @@ export default function Page() {
             <div className="flex items-center gap-2">
                 <InputSearch placeholder = 'Search...' />
                 <Link
-                    href="/dashboard/users/add"
+                    href="/dashboard/users/edit/1"
                     className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
                 >
                     <Plus

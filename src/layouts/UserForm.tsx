@@ -54,12 +54,13 @@ const FormInputContainer = ({children}: {children: React.ReactNode}) => (
 
 export default function UserForm({
     closeModal = () => undefined,
-    clasName,
+    className,
     isModal = false,
     ...props
 }: {
+    user: null | {[key: string]: any}
     closeModal?: () => void,
-    clasName?: string,
+    className?: string,
     isModal: boolean,
     props?: any[]
 }) {
@@ -183,7 +184,9 @@ export default function UserForm({
 
         data.append('emails', JSON.stringify([inputs.email]));
 
-        data.append('address', inputs.address);
+        if((inputs.address ?? '').trim().length > 0) {
+            data.append('address', inputs.address.trim());
+        }
 
         /* let newData: {[key: string]: any} = {};
 
@@ -201,8 +204,6 @@ export default function UserForm({
                     authorization: `Bearer ${session?.backendTokens.accessToken}`
                 },
             });
-
-            setIsLoading(false);
 
             switch(res.status) {
                 case 401:
@@ -228,7 +229,11 @@ export default function UserForm({
 
                         const fieldsKey = Object.keys(fields);
 
-                        fieldsKey.forEach((field: string) => setError(inputFields[field] === null ? field : inputFields[field].field, {message: fields[field]}));
+                        fieldsKey.forEach((field: string) => {
+                            setError(inputFields[field] === null ? field : inputFields[field].field, {message: fields[field]});
+                        });
+
+                        setIsLoading(false);
 
                         if(!Object.keys(inputFields).some((key: string) => fieldsKey.includes(key))) {
                             throw 'error';
@@ -238,6 +243,8 @@ export default function UserForm({
                             position: 'bottom-right',
                             closeButton: true,
                         });
+
+                        return closeModal();
                     }
                     break;
                 case 500:
@@ -277,7 +284,7 @@ export default function UserForm({
                     {...props}
                     className={clsx({
                         "w-full h-full flex justify-center items-center": true,
-                        ...(!clasName ? {} : {[clasName]: true})
+                        ...(!className ? {} : {[className]: true})
                     })}
                 >
                     <div
@@ -306,7 +313,6 @@ export default function UserForm({
                                     refference = {photoRegister.ref} */
                                     name="photo"
                                     onChange={(e: { target: { name: 'photo', files: FileList } }) => {
-                                        console.log(e.target.files[0]);
                                         setValue('photo', e.target.files[0]);
                                     }}
                                 />
