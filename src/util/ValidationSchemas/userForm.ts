@@ -4,7 +4,7 @@ import validator from 'validator';
 export const MAX_FILE_SIZE = 10 * (1024 * 1024); // 10 MB
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-export const genders = {"M": 'Male', 'F': 'Female'};
+export const genders = {"Male": 'Male', 'Female': 'Female'};
 
 export const userSchema = z.object({
     first_name: z

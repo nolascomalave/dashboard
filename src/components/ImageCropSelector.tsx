@@ -1,5 +1,6 @@
 'use client';
 
+import ImageNext from "next/image";
 import React, { Ref, useEffect, useRef, useState } from 'react';
 import {
     Image,
@@ -26,12 +27,14 @@ export default function ImageCropSelector({
     Icon = Image,
     refference,
     onChange,
+    alt,
     ...props
 }: {
     name?: string;
     Icon?: any;
     refference?: (instance: any) => void;
     onChange?: (obj: { target: ({ name: string; files: FileList }) }) => any;
+    alt?: string,
     props: any;
 }) {
     const [originalImage, setOriginalImage]=useState(null),
@@ -109,9 +112,12 @@ export default function ImageCropSelector({
                             className='w-10 h-10'
                         />
                     ) : (
-                        <img
+                        <ImageNext
                             src={updatedImage.url ?? originalImage}
                             className='w-full h-full rounded-full object-cover object-center'
+                            alt={alt ?? "Photo"}
+                            width={1000}
+                            height={1000}
                         />
                     )}
                 </button>
@@ -182,6 +188,7 @@ export default function ImageCropSelector({
                 <ImageViewer
                     src = {updatedImage.url ?? originalImage}
                     closeModal = {() => setIsOpenViewer(false)}
+                    alt={alt ?? "Photo"}
                 />
             )}
 

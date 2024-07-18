@@ -104,7 +104,7 @@ export default function UserForm({
                     }
                 } : {}),
                 'emails.0': {
-                    field: 'mail',
+                    field: 'email',
                     alias: 'Email'
                 },
                 'documents.0': {
@@ -122,14 +122,14 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_name,
-            id_entity_name_type: 1,
+            id_entity_name_type: 6,
             order: 1
         });
 
         if((inputs.second_name ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_name,
-                id_entity_name_type: 1,
+                id_entity_name_type: 6,
                 order: 2
             });
 
@@ -141,7 +141,7 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_surname,
-            id_entity_surname_type: 2,
+            id_entity_name_type: 7,
             order: 1
         });
 
@@ -153,7 +153,7 @@ export default function UserForm({
         if((inputs.second_surname ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_surname,
-                id_entity_surname_type: 2,
+                id_entity_name_type: 7,
                 order: 2
             });
 
@@ -173,24 +173,15 @@ export default function UserForm({
             order: 1
         }]));
 
-        phones.push({
-            phone: inputs.first_phone,
-            order: 1
-        });
-
         if((inputs.second_phone ?? '').toString().trim().length > 0) {
-            phones.push({
-                phone: inputs.second_phone,
-                order: 2
-            });
+            // phones.push(inputs.second_phone);
+            data.append('phones', inputs.first_phone.toString());
+            data.append('phones', inputs.second_phone.toString());
+        } else {
+            data.append('phones', JSON.stringify([inputs.first_phone.toString()]));
         }
 
-        data.append('phones', JSON.stringify(phones));
-
-        data.append('emails', JSON.stringify([{
-            phone: inputs.email,
-            order: 1
-        }]));
+        data.append('emails', JSON.stringify([inputs.email]));
 
         data.append('address', inputs.address);
 
@@ -226,9 +217,9 @@ export default function UserForm({
 
                         response.message.forEach((err: string) => {
                             const field = err.split(' ')[0],
-                                alias = inputFields[field] !== null ? inputFields[field].alias : null;
+                                alias = (inputFields[field] ?? null) !== null ? inputFields[field].alias : null;
 
-                            if(field in fields) {
+                            if((field in fields) || !(field in inputFields)) {
                                 return;
                             }
 
@@ -237,9 +228,9 @@ export default function UserForm({
 
                         const fieldsKey = Object.keys(fields);
 
-                        if(Object.keys(inputFields).some((key: string) => fieldsKey.includes(key))) {
-                            fieldsKey.forEach((field: string) => setError(inputFields[field] === null ? field : inputFields[field].field, {message: fields[field]}));
-                        } else {
+                        fieldsKey.forEach((field: string) => setError(inputFields[field] === null ? field : inputFields[field].field, {message: fields[field]}));
+
+                        if(!Object.keys(inputFields).some((key: string) => fieldsKey.includes(key))) {
                             throw 'error';
                         }
                     } else {
@@ -254,6 +245,7 @@ export default function UserForm({
                     throw 'error';
             }
         } catch(e: any) {
+            console.log(e)
             setIsLoading(false);
             /* toast.error('An unexpected error has occurred.', {
                 position: 'bottom-left',
