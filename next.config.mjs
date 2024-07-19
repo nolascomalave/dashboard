@@ -28,7 +28,8 @@ const nextConfig = {
     },
     env: {
         API:'http://'+ip+':3000'
-    }
+    },
+    reactStrictMode: false
 };
 
 export default nextConfig;

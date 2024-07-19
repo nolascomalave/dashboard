@@ -5,14 +5,21 @@ import styles from './Modal.module.scss';
 import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { toast } from 'sonner';
 
 
 export function Modal({
     title,
+    closeInmediatly = null,
     children
 }: {
     title: any;
+    closeInmediatly: null | {
+        fn?: 'success' | 'error' | 'info' | 'warning';
+        message: string;
+        options?: undefined | {[key: string]: any};
+    };
     children: React.ReactNode;
 }) {
   const router = useRouter(),
@@ -21,6 +28,15 @@ export function Modal({
   const closeModal = () => {
     router.back();
   }
+
+  useEffect(() => {
+    if(closeInmediatly !== null) {
+        (!closeInmediatly.fn ? toast : toast[closeInmediatly.fn](closeInmediatly.message, closeInmediatly.options));
+
+        console.log('example');
+        closeModal();
+    }
+  });
 
   return createPortal(
     (

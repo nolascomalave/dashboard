@@ -307,7 +307,7 @@ export default function ImageCropper({
 
       <ul className='flex gap-2 flex-wrap'>
         {aspects.map((asp: any, i: number) => (
-          <li>
+          <li key={i}>
             <InputRadio
               key = {i}
               name = "image-cropper-aspect"

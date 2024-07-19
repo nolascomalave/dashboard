@@ -1,12 +1,14 @@
 'use client';
 import InputSearch from "@/components/InputSearch";
 import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import Table from "@/components/Table";
+import { usePathname } from "next/navigation";
 
 export default function Page() {
+    const pathname = usePathname();
     const [status, setStatus]: [
         {
             Active: boolean,
@@ -19,6 +21,10 @@ export default function Page() {
         Inactive: true,
         Annulled: true
     });
+
+    useEffect(() => {
+        console.log('Is in page', pathname === '/dashboard/users');
+    }, [pathname]);
 
     return <>
         <div className="filters w-100 flex-shrink-0 flex justify-between gap-2">
@@ -46,7 +52,7 @@ export default function Page() {
             <div className="flex items-center gap-2">
                 <InputSearch placeholder = 'Search...' />
                 <Link
-                    href="/dashboard/users/edit/1"
+                    href="/dashboard/users/edit/3"
                     className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
                 >
                     <Plus

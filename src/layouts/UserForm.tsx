@@ -12,6 +12,7 @@ import { ClientFetch } from "@/util/Fetching.js";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
+import * as API_consts from '@/assets/API_Constants';
 
 import {
     Select,
@@ -26,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { userSchema, genders } from "@/util/ValidationSchemas/userForm";
 import { useEffect, useState } from "react";
 import ImageCropSelector from "@/components/ImageCropSelector";
+import { FullUser } from "@/assets/types/users";
 
 type Inputs = {
     first_name: string;
@@ -55,14 +57,15 @@ const FormInputContainer = ({children}: {children: React.ReactNode}) => (
 export default function UserForm({
     closeModal = () => undefined,
     className,
+    user = undefined,
     isModal = false,
     ...props
 }: {
-    user: null | {[key: string]: any}
-    closeModal?: () => void,
-    className?: string,
-    isModal: boolean,
-    props?: any[]
+    user: undefined | FullUser;
+    closeModal?: () => void;
+    className?: string;
+    isModal: boolean;
+    props?: any[];
 }) {
     const { data: session } = useSession(),
         router = useRouter(),
@@ -78,6 +81,13 @@ export default function UserForm({
             formState: { errors },
         } = useForm<Inputs>({
             resolver: zodResolver(userSchema),
+            /* ...(!user ? {} : {
+                values: {
+                    address: user.address ?? '',
+                    gender: user.gender ?? '',
+                    ssn: user.documents === null ? null : user.documents.find()
+                }
+            }) */
         }),
         genderRegister = register("gender");
 
@@ -123,14 +133,14 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_name,
-            id_entity_name_type: 6,
+            id_entity_name_type: API_consts.entity_name_type.name,
             order: 1
         });
 
         if((inputs.second_name ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_name,
-                id_entity_name_type: 6,
+                id_entity_name_type: API_consts.entity_name_type.name,
                 order: 2
             });
 
@@ -142,7 +152,7 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_surname,
-            id_entity_name_type: 7,
+            id_entity_name_type: API_consts.entity_name_type.surname,
             order: 1
         });
 
@@ -154,7 +164,7 @@ export default function UserForm({
         if((inputs.second_surname ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_surname,
-                id_entity_name_type: 7,
+                id_entity_name_type: API_consts.entity_name_type.surname,
                 order: 2
             });
 
@@ -264,6 +274,7 @@ export default function UserForm({
     };
 
     useEffect(() => {
+        console.log(user);
         setFormID(`user-form-${Date.now()}`)
     }, []);
 
