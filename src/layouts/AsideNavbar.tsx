@@ -75,7 +75,7 @@ export default function AsideNavbar() {
         <aside
             className={clsx({
                 [styles.AsideNavbar]: true,
-                'relative': true,
+                'relative hidden sm:flex': true,
                 'contracted': sidebar.isContracted
             })}
             style={{

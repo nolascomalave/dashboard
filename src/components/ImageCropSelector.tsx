@@ -28,6 +28,7 @@ export default function ImageCropSelector({
     refference,
     onChange,
     alt,
+    initialImage,
     ...props
 }: {
     name?: string;
@@ -35,9 +36,10 @@ export default function ImageCropSelector({
     refference?: (instance: any) => void;
     onChange?: (obj: { target: ({ name: string; files: FileList }) }) => any;
     alt?: string,
+    initialImage?: string;
     props: any;
 }) {
-    const [originalImage, setOriginalImage]=useState(null),
+    const [originalImage, setOriginalImage]=useState(initialImage ?? null),
         [updatedImage, setUpdatedImage] = useState<{url: string | null, blob: Blob | null}>({url: null, blob: null}),
         // [updatedSrcImage, setUpdatedSrcImage] = useState(null),
         [modalOpen, setModalOpen] = useState<boolean>(false),
@@ -77,11 +79,14 @@ export default function ImageCropSelector({
                 onChange({
                     target: {
                         name,
-                        files: inputRef.current.files
+                        files: {
+                            length: 0,
+                            0: null
+                        }
                     }
                 });
             }
-        } else if(originalImage) {
+        } else if(originalImage && originalImage !== initialImage) {
             setModalOpen(true);
         }
     }, [originalImage]);
@@ -112,12 +117,26 @@ export default function ImageCropSelector({
                             className='w-10 h-10'
                         />
                     ) : (
-                        <ImageNext
+                        <img
                             src={updatedImage.url ?? originalImage}
                             className='w-full h-full rounded-full object-cover object-center'
                             alt={alt ?? "Photo"}
-                            width={1000}
-                            height={1000}
+                            onError={(e) => {
+                                setOriginalImage(null);
+                                if(onChange && !!name) {
+                                    onChange({
+                                        target: {
+                                            name,
+                                            files: {
+                                                length: 0,
+                                                0: null
+                                            }
+                                        }
+                                    });
+                                }
+                            }}
+                            /* width={1000}
+                            height={1000} */
                         />
                     )}
                 </button>
@@ -144,13 +163,15 @@ export default function ImageCropSelector({
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem
-                                    className='cursor-pointer'
-                                    onClick={() => setModalOpen(true)}
-                                >
-                                    <Pen className="mr-2 h-4 w-4" />
-                                    <span>Edit</span>
-                                </DropdownMenuItem>
+                                {originalImage !== initialImage && (
+                                    <DropdownMenuItem
+                                        className='cursor-pointer'
+                                        onClick={() => setModalOpen(true)}
+                                    >
+                                        <Pen className="mr-2 h-4 w-4" />
+                                        <span>Edit</span>
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
                                     className='cursor-pointer'
                                     onClick={chooseImage}

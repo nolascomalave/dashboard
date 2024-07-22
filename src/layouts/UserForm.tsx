@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // import { useFormik } from 'formik';
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import ModalFooter from "@/layouts/UI/ModalFooter";
@@ -27,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { userSchema, genders } from "@/util/ValidationSchemas/userForm";
 import { useEffect, useState } from "react";
 import ImageCropSelector from "@/components/ImageCropSelector";
-import { FullUser } from "@/assets/types/users";
+import { CompleteEntityUser } from "@/assets/types/users";
 
 type Inputs = {
     first_name: string;
@@ -61,7 +61,7 @@ export default function UserForm({
     isModal = false,
     ...props
 }: {
-    user: undefined | FullUser;
+    user: undefined | CompleteEntityUser;
     closeModal?: () => void;
     className?: string;
     isModal: boolean;
@@ -72,6 +72,7 @@ export default function UserForm({
         [formID, setFormID] = useState<undefined | string>(undefined),
         [isLoading, setIsLoading] = useState<boolean>(false),
         {
+            control,
             register,
             handleSubmit,
             /* control,
@@ -81,13 +82,22 @@ export default function UserForm({
             formState: { errors },
         } = useForm<Inputs>({
             resolver: zodResolver(userSchema),
-            /* ...(!user ? {} : {
+            ...(!user ? {} : {
                 values: {
+                    photo: !user.photo ? null : undefined,
+                    first_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+                    second_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+                    first_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+                    second_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
                     address: user.address ?? '',
                     gender: user.gender ?? '',
-                    ssn: user.documents === null ? null : user.documents.find()
+                    ssn: user.documents === null ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+                    email: user.emails === null ? '' : (user.emails[0]),
+                    first_phone: user.phones === null ? '' : (user.phones[0]),
+                    second_phone: user.phones === null ? '' : (user.phones[1] ?? ''),
+                    address: user.address ?? ''
                 }
-            }) */
+            })
         }),
         genderRegister = register("gender");
 
@@ -126,9 +136,12 @@ export default function UserForm({
                 'address': null,
                 'photo': null
             };
+            console.log(inputs.photo)
 
         if(!!inputs.photo) {
             data.append('photo', inputs.photo);
+        } else if(inputs.photo !== undefined) {
+            data.append('removePhoto', '1');
         }
 
         names.push({
@@ -208,7 +221,7 @@ export default function UserForm({
 
         try {
             const res = await ftc.post({
-                url: `${process.env.API}/system-subscription-users`,
+                url: `${process.env.API}/system-subscription-users${!user ? '' : `/${user.id_system_subscription_user}`}`,
                 data: data,
                 headers: {
                     authorization: `Bearer ${session?.backendTokens.accessToken}`
@@ -219,6 +232,7 @@ export default function UserForm({
                 case 401:
                     return router.push('/login');
                 case 400:
+                case 200:
                 case 201:
                     const response = await res.json();
 
@@ -249,7 +263,7 @@ export default function UserForm({
                             throw 'error';
                         }
                     } else {
-                        toast.success(`User was created`, {
+                        toast.success(`User was ${!user ? 'created' : 'updated'}`, {
                             position: 'bottom-right',
                             closeButton: true,
                         });
@@ -288,6 +302,7 @@ export default function UserForm({
                         loading: 'Creating User...',
                         // success: () => `User was created`,
                         error: (error: string) => error,
+                        closeButton: true
                     });
                 })}
             >
@@ -322,6 +337,7 @@ export default function UserForm({
                                     pattern = {photoRegister.pattern}
                                     required = {photoRegister.required}
                                     refference = {photoRegister.ref} */
+                                    initialImage = {!user ? undefined : (!user.photo ? undefined : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`)}
                                     name="photo"
                                     onChange={(e: { target: { name: 'photo', files: FileList } }) => {
                                         setValue('photo', e.target.files[0]);
@@ -378,26 +394,33 @@ export default function UserForm({
 
                         <FormInputContainer>
                             <Label htmlFor="gender">Gender</Label>
-                            <Select
-                                name={genderRegister.name}
-                                disabled={genderRegister.disabled}
-                                required={genderRegister.required}
-                                onValueChange={(val: string) => genderRegister.onChange({target: {name: 'gender', value: val}})}
-                            >
-                                <SelectTrigger id="gender" className="w-full">
-                                    <SelectValue placeholder="Select a gender" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Gender</SelectLabel>
-                                        {Object.keys(genders).map((el: string, i: number) => {
-                                            return (
-                                                <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
-                                            );
-                                        })}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            <Controller
+                                name="gender"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        name={field.name}
+                                        disabled={field.disabled}
+                                        required={genderRegister.required}
+                                        onValueChange={(val: string) => field.onChange({target: {name: field.name, value: val}})}
+                                        value={field.value}
+                                    >
+                                        <SelectTrigger id="gender" className="w-full">
+                                            <SelectValue placeholder="Select a gender" />
+                                        </SelectTrigger>
+                                        <SelectContent ref={field.ref}>
+                                            <SelectGroup>
+                                                <SelectLabel>Gender</SelectLabel>
+                                                {Object.keys(genders).map((el: string, i: number) => {
+                                                    return (
+                                                        <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
+                                                    );
+                                                })}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
                             {errors.gender?.message && <FormErrorMessage>{errors.gender?.message}</FormErrorMessage>}
                         </FormInputContainer>
 

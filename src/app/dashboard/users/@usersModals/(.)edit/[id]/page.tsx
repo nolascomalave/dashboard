@@ -4,12 +4,12 @@ import { ClientFetch } from '@/util/Fetching';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from 'next/navigation';
-import { FullUser } from '@/assets/types/users';
+import { CompleteEntityUser } from '@/assets/types/users';
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const session = await getServerSession(authOptions),
     ftc = new ClientFetch();
-  let user: undefined | FullUser = undefined,
+  let user: undefined | CompleteEntityUser = undefined,
     closeInmediatly: null | {
       fn?: 'success' | 'error' | 'info' | 'warning';
       message: string;
@@ -19,6 +19,9 @@ export default async function Page({ params: { id } }: { params: { id: string } 
   try {
     const res = await ftc.get({
       url: `${process.env.API}/system-subscription-users/${id}`,
+      data: {
+        allEntityInfo: true
+      },
       headers: {
           authorization: `Bearer ${session?.backendTokens.accessToken}`
       },

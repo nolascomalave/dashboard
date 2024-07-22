@@ -6,6 +6,9 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import Table from "@/components/Table";
 import { usePathname } from "next/navigation";
+import clsx from "clsx";
+import styles from './styles.module.scss';
+import EntityCard from "@/components/EntityCard";
 
 export default function Page() {
     const pathname = usePathname();
@@ -52,7 +55,7 @@ export default function Page() {
             <div className="flex items-center gap-2">
                 <InputSearch placeholder = 'Search...' />
                 <Link
-                    href="/dashboard/users/edit/3"
+                    href="/dashboard/users/edit/2"
                     className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
                 >
                     <Plus
@@ -67,8 +70,19 @@ export default function Page() {
                 </Link>
             </div>
         </div>
-        <div className="h-full">
-            <Table/>
+        <div
+            className={"w-full h-full grid grid-cols-1 sm:grid-cols-2 grid-rows-none content-start lg:grid-cols-3 grid-flow-row gap-4 md:gap-8"}
+        >
+            <EntityCard/>
+            <EntityCard/>
+            <EntityCard/>
+            <EntityCard/>
+            <EntityCard/>
+            <EntityCard/>
+            {/* <div className="w-full p-4 bg-black"></div>
+            <div className="w-full p-4 bg-red-400"></div>
+            <div className="w-full p-4 bg-green-400"></div> */}
+            {/* <Table/> */}
         </div>
     </>
 }

@@ -43,11 +43,9 @@ export default function ImageViewer({
                     >
                         <X width={20} height={20} />
                     </button>
-                    <Image
+                    <img
                         src={src}
                         alt={alt}
-                        width={1000}
-                        height={1000}
                         style={{
                             width: '100%',
                             height: '100%',
