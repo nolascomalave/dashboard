@@ -1,4 +1,5 @@
 'use client';
+
 import InputSearch from "@/components/InputSearch";
 import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
 import { useEffect, useState } from "react";
@@ -9,9 +10,16 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import styles from './styles.module.scss';
 import EntityCard from "@/components/EntityCard";
+import { ClientFetch } from "@/util/Fetching";
+import { useSession } from "next-auth/react"
+import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 export default function Page() {
-    const pathname = usePathname();
+    const { data: session } = useSession(),
+        // router = useRouter(),
+        pathname = usePathname(),
+        [ users, setUsers ] = useState<any[]>([]);
     const [status, setStatus]: [
         {
             Active: boolean,
@@ -25,9 +33,47 @@ export default function Page() {
         Annulled: true
     });
 
+    const fetchUsers = async () => {
+        const ftc = new ClientFetch();
+
+        try {
+            const res = await ftc.get({
+                url: `${process.env.API}/system-subscription-users/`,
+                headers: {
+                    authorization: `Bearer ${session?.backendTokens.accessToken}`
+                },
+            });
+
+            if(res.status !== 200) {
+                if(res.status === 401) {
+                    // return router.push('/login');
+                }
+
+                throw 'error';
+            }
+
+            const { data } = await res.json();
+
+            console.log(data);
+            setUsers(data);
+        } catch(e: any) {
+            toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
+            });
+        }
+    }
+
     useEffect(() => {
         console.log('Is in page', pathname === '/dashboard/users');
     }, [pathname]);
+
+    useEffect(() => {
+        if(!!session) {
+            fetchUsers();
+        }
+    }, [session]);
 
     return <>
         <div className="filters w-100 flex-shrink-0 flex justify-between gap-2">
@@ -71,14 +117,18 @@ export default function Page() {
             </div>
         </div>
         <div
-            className={"w-full h-full grid grid-cols-1 sm:grid-cols-2 grid-rows-none content-start lg:grid-cols-3 grid-flow-row gap-4 md:gap-8"}
+            className={"w-full h-full grid grid-cols-1 sm:grid-cols-2 grid-rows-none content-start lg:grid-cols-3 xl:grid-cols-4 grid-flow-row gap-4 md:gap-8"}
         >
+            {users.map((user, key: number) => (
+                <div key={key}>
+                    <EntityCard />
+                </div>
+            ))}
+            {/* <EntityCard/>
             <EntityCard/>
             <EntityCard/>
             <EntityCard/>
-            <EntityCard/>
-            <EntityCard/>
-            <EntityCard/>
+            <EntityCard/> */}
             {/* <div className="w-full p-4 bg-black"></div>
             <div className="w-full p-4 bg-red-400"></div>
             <div className="w-full p-4 bg-green-400"></div> */}
