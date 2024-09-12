@@ -5,21 +5,22 @@ import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
 import { useEffect, useState } from "react";
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import Table from "@/components/Table";
+/* import Table from "@/components/Table"; */
 import { usePathname } from "next/navigation";
-import clsx from "clsx";
-import styles from './styles.module.scss';
+/* import clsx from "clsx";
+import styles from './styles.module.scss'; */
 import EntityCard from "@/components/EntityCard";
 import { ClientFetch } from "@/util/Fetching";
 import { useSession } from "next-auth/react"
 import { toast } from "sonner";
-import { useRouter } from "next/router";
+import { CompleteEntityUser } from "@/assets/types/users";
+/* import { useRouter } from "next/router"; */
 
 export default function Page() {
     const { data: session } = useSession(),
         // router = useRouter(),
         pathname = usePathname(),
-        [ users, setUsers ] = useState<any[]>([]);
+        [ users, setUsers ] = useState<CompleteEntityUser[]>([]);
     const [status, setStatus]: [
         {
             Active: boolean,
@@ -54,7 +55,6 @@ export default function Page() {
 
             const { data } = await res.json();
 
-            console.log(data);
             setUsers(data);
         } catch(e: any) {
             toast.error('An unexpected error has occurred.', {
@@ -101,7 +101,7 @@ export default function Page() {
             <div className="flex items-center gap-2">
                 <InputSearch placeholder = 'Search...' />
                 <Link
-                    href="/dashboard/users/edit/2"
+                    href="/dashboard/users/add"
                     className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
                 >
                     <Plus
@@ -120,8 +120,12 @@ export default function Page() {
             className={"w-full h-full grid grid-cols-1 sm:grid-cols-2 grid-rows-none content-start lg:grid-cols-3 xl:grid-cols-4 grid-flow-row gap-4 md:gap-8"}
         >
             {users.map((user, key: number) => (
-                <div key={key}>
-                    <EntityCard />
+                <div key={key} className="flex justify-center">
+                    <EntityCard
+                        User = {user}
+                        hrefEdit = {`/dashboard/users/edit/${user.id_system_subscription_user}`}
+                        image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
+                    />
                 </div>
             ))}
             {/* <EntityCard/>

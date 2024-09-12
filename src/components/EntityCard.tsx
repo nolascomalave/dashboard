@@ -3,12 +3,16 @@
 import clsx from 'clsx';
 import styles from './EntityCard.module.scss';
 import { Ellipsis, UserRound } from 'lucide-react';
-import useItemsSelector, { Checkbox } from '@/hooks/useItemsSelector';
+import /* useItemsSelector, */ { Checkbox } from '@/hooks/useItemsSelector';
+import { CompleteEntityUser } from '@/assets/types/users';
+import Link from 'next/link';
+import { Badge, badgeVariants } from "@/components/ui/badge";
 
 export default function EntityCard({
     image,
     selectableController,
-    children
+    User,
+    hrefEdit
 }: {
     image?: string,
     selectableController?: {
@@ -20,7 +24,8 @@ export default function EntityCard({
         check: (uniqueKey: string | number | symbol) => void;
         uncheck: (uniqueKey: string | number | symbol) => void;
     };
-    children?: React.ReactNode
+    User: CompleteEntityUser;
+    hrefEdit: string;
 }) {
     const { keyItem, value, ...controller } = selectableController ?? {};
 
@@ -28,7 +33,7 @@ export default function EntityCard({
         <div
             className={clsx({
                 [styles['entity-card']]: true,
-                'bg-white': true
+                'bg-white w-full flex flex-col': true
             })}
             style={{
                 boxShadow: '0px 9px 20px rgba(46, 35, 94, 0.07)',
@@ -49,8 +54,7 @@ export default function EntityCard({
                     <button
                         type='button'
                         className={clsx({
-                            'rounded-full text-primary_color bg-primary_layout': true,
-                            'opacity-75': !image
+                            'rounded-full text-primary_color duration-100 bg-primary_layout focus:bg-secondary_layout hover:bg-secondary_layout': true
                         })}
                         style={{
                             width: '3rem',
@@ -72,39 +76,58 @@ export default function EntityCard({
                         )}
                     </button>
 
-                    <button
+                    {(User.annulled_at ?? null) !== null ? (
+                        <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
+                    ) : (
+                        <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-emerald-700 border-emerald-700 opacity-75"}>Active</Badge>
+                    )}
+                    {/* <button
                         type='button'
                         className='absolute top-0 right-0'
                     >
                         <Ellipsis width={15} height={15} />
-                    </button>
+                    </button> */}
                 </div>
             </div>
-            <div className='text-center'>
-                <p><b>Nolasco Malavé</b></p>
-                <p>MALAVEN</p>
-                <p>User Master</p>
+            <div className='h-full text-center mt-2 mb-4'>
+                <p><b>{ User.name }</b></p>
+                <p>{ User.username }</p>
+                { User.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
             </div>
-            <div className='flex'>
-                <button
-                    type='button'
-                    className='w-full'
-                >
-                    View Profile
-                </button>
-                <button
-                    type='button'
-                    className='w-full border-s border-e'
-                >
-                    Edit
-                </button>
-                <button
-                    type='button'
-                    className='w-full'
-                >
-                    Delete
-                </button>
-            </div>
+
+            {(!!User.is_admin && User.username.toLowerCase() === 'admin') ? null : (
+                <div className='flex pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
+                    {/* <button
+                        type='button'
+                        className='w-full px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                    >
+                        View Profile
+                    </button> */}
+                    {(User.annulled_at ?? null) !== null ? (
+                        <button
+                            type='button'
+                            className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
+                        >
+                            Activate
+                        </button>
+                    ) : (
+                        <>
+                            <Link
+                                href = {hrefEdit}
+                                className='w-full text-center bg-white px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                            >
+                                Edit
+                            </Link>
+                            <button
+                                type='button'
+                                className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
+                            >
+                                Inactivate
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
