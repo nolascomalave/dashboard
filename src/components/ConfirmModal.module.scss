@@ -1,0 +1,50 @@
+.ConfirmModal {
+    & > div {
+        &:first-child {
+            display: none;
+            z-index: 1;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            animation-fill-mode: forwards;
+            animation-duration: 1s;
+        }
+    }
+
+    &[class~="isOpen"] {
+        & > div:first-child {
+            display: initial;
+        }
+
+        &:not([class~="isShown"]) > div:first-child {
+            animation-name: hiddenBackdrop;
+        }
+    }
+
+    &[class~="isShown"][class~="isOpen"] > div:first-child {
+        animation-name: shownBackdrop;
+    }
+}
+
+@keyframes shownBackdrop {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes hiddenBackdrop {
+    0% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

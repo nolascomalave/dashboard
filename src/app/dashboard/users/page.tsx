@@ -14,6 +14,7 @@ import { ClientFetch } from "@/util/Fetching";
 import { useSession } from "next-auth/react"
 import { toast } from "sonner";
 import { CompleteEntityUser } from "@/assets/types/users";
+import ConfirmModal from "@/components/ConfirmModal";
 /* import { useRouter } from "next/router"; */
 
 export default function Page() {
@@ -32,7 +33,13 @@ export default function Page() {
         Active: true,
         Inactive: true,
         Annulled: true
-    });
+    }),
+    [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
+
+    const openActInactModal = () => {
+        setIsOpenActInactModal(true);
+        console.log('Is Opened!');
+    }
 
     const fetchUsers = async () => {
         const ftc = new ClientFetch();
@@ -125,6 +132,8 @@ export default function Page() {
                         User = {user}
                         hrefEdit = {`/dashboard/users/edit/${user.id_system_subscription_user}`}
                         image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
+                        activateAction = { openActInactModal }
+                        inactivateAction = { openActInactModal }
                     />
                 </div>
             ))}
@@ -138,5 +147,12 @@ export default function Page() {
             <div className="w-full p-4 bg-green-400"></div> */}
             {/* <Table/> */}
         </div>
+
+        {isOpenActInactModal && (
+            <ConfirmModal
+                isOpen = { isOpenActInactModal }
+                setIsOpen = { setIsOpenActInactModal }
+            />
+        )}
     </>
 }

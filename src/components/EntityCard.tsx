@@ -12,7 +12,9 @@ export default function EntityCard({
     image,
     selectableController,
     User,
-    hrefEdit
+    hrefEdit,
+    activateAction,
+    inactivateAction
 }: {
     image?: string,
     selectableController?: {
@@ -26,6 +28,8 @@ export default function EntityCard({
     };
     User: CompleteEntityUser;
     hrefEdit: string;
+    activateAction: () => any;
+    inactivateAction: () => any;
 }) {
     const { keyItem, value, ...controller } = selectableController ?? {};
 
@@ -91,7 +95,7 @@ export default function EntityCard({
             </div>
             <div className='h-full text-center mt-2 mb-4'>
                 <p><b>{ User.name }</b></p>
-                <p>{ User.username }</p>
+                <p>{ User.username.toUpperCase() }</p>
                 { User.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
             </div>
 
@@ -107,6 +111,7 @@ export default function EntityCard({
                         <button
                             type='button'
                             className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
+                            onClick={() => activateAction()}
                         >
                             Activate
                         </button>
@@ -121,6 +126,7 @@ export default function EntityCard({
                             <button
                                 type='button'
                                 className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
+                                onClick={() => inactivateAction()}
                             >
                                 Inactivate
                             </button>
