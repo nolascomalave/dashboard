@@ -148,11 +148,9 @@ export default function Page() {
             {/* <Table/> */}
         </div>
 
-        {isOpenActInactModal && (
-            <ConfirmModal
-                isOpen = { isOpenActInactModal }
-                setIsOpen = { setIsOpenActInactModal }
-            />
-        )}
+        <ConfirmModal
+            isOpen = { isOpenActInactModal }
+            setIsOpen = { setIsOpenActInactModal }
+        />
     </>
 }

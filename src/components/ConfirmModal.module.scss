@@ -1,50 +1,46 @@
-.ConfirmModal {
-    & > div {
-        &:first-child {
-            display: none;
-            z-index: 1;
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: black;
-            animation-fill-mode: forwards;
-            animation-duration: 1s;
-        }
-    }
-
-    &[class~="isOpen"] {
-        & > div:first-child {
-            display: initial;
-        }
-
-        &:not([class~="isShown"]) > div:first-child {
-            animation-name: hiddenBackdrop;
-        }
-    }
-
-    &[class~="isShown"][class~="isOpen"] > div:first-child {
-        animation-name: shownBackdrop;
-    }
+.fixedContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
 }
 
-@keyframes shownBackdrop {
-    0% {
-        opacity: 0;
+.dialog {
+    background-color: white;
+
+    & > section {
+        padding: 2rem;
     }
 
-    100% {
-        opacity: 0.5;
-    }
-}
+    & > footer {
+        display: flex;
+        justify-content: flex-end;
+        border-bottom-right-radius: calc(var(--radius) - 2px);
+        border-bottom-left-radius: calc(var(--radius) - 2px);
 
-@keyframes hiddenBackdrop {
-    0% {
-        opacity: 0.5;
-    }
+        & > button {
+            width: 100%;
+            padding: 0.5rem;
+            opacity: 0.25;
+            transition-duration: 0.5s;
 
-    100% {
-        opacity: 0;
+            &:hover {
+                // font-weight: bold;
+                opacity: 1;
+            }
+
+            &:first-child {
+                border-bottom-left-radius: calc(var(--radius) - 2px);
+            }
+
+            &:last-child {
+                border-bottom-right-radius: calc(var(--radius) - 2px);
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 export default async function Layout({ children, usersModals }: { children: React.ReactNode, usersModals: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
-    if(!session) {
+    if(!session || !session.backendTokens) {
         redirect('/login');
     }
 

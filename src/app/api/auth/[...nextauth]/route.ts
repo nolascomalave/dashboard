@@ -6,6 +6,8 @@ import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshToken(token: JWT): Promise<JWT> {
+  if(!token || !token.backendTokens) return token;
+
   const ftc = new ClientFetch();
 
   const res = await ftc.post({
@@ -20,7 +22,7 @@ async function refreshToken(token: JWT): Promise<JWT> {
 
   return {
     ...token,
-    backendTokens: response,
+    backendTokens: res.status !== 200 ? null : response,
   };
 }
 
