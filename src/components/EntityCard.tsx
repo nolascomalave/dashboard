@@ -12,6 +12,7 @@ export default function EntityCard({
     image,
     selectableController,
     User,
+    CurrentUser,
     hrefEdit,
     activateAction,
     inactivateAction
@@ -27,9 +28,10 @@ export default function EntityCard({
         uncheck: (uniqueKey: string | number | symbol) => void;
     };
     User: CompleteEntityUser;
+    CurrentUser?: CompleteEntityUser | null;
     hrefEdit: string;
-    activateAction: () => any;
-    inactivateAction: () => any;
+    activateAction: (User: CompleteEntityUser) => any;
+    inactivateAction: (User: CompleteEntityUser) => any;
 }) {
     const { keyItem, value, ...controller } = selectableController ?? {};
 
@@ -80,7 +82,7 @@ export default function EntityCard({
                         )}
                     </button>
 
-                    {(User.annulled_at ?? null) !== null ? (
+                    {(User.inactivated_at ?? null) !== null ? (
                         <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
                     ) : (
                         <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-emerald-700 border-emerald-700 opacity-75"}>Active</Badge>
@@ -107,11 +109,11 @@ export default function EntityCard({
                     >
                         View Profile
                     </button> */}
-                    {(User.annulled_at ?? null) !== null ? (
+                    {((User.inactivated_at ?? null) !== null && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) ? (
                         <button
                             type='button'
                             className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
-                            onClick={() => activateAction()}
+                            onClick={() => activateAction(User)}
                         >
                             Activate
                         </button>
@@ -123,13 +125,15 @@ export default function EntityCard({
                             >
                                 Edit
                             </Link>
-                            <button
-                                type='button'
-                                className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
-                                onClick={() => inactivateAction()}
-                            >
-                                Inactivate
-                            </button>
+                            {(!CurrentUser || CurrentUser.id !== User.id_system_subscription_user) && (
+                                <button
+                                    type='button'
+                                    className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
+                                    onClick={() => inactivateAction(User)}
+                                >
+                                    Inactivate
+                                </button>
+                            )}
                         </>
                     )}
                 </div>

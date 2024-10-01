@@ -1,3 +1,5 @@
+@import '../assets/scss/vars.module.scss';
+
 .fixedContainer {
     display: flex;
     align-items: center;
@@ -11,10 +13,24 @@
 }
 
 .dialog {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     background-color: white;
 
     & > section {
-        padding: 2rem;
+        padding: 1rem 1.5rem;
+        color: $secondary-color;
+        text-align: center;
+
+        & > h2[class~="title"] {
+            font-size: 1.25rem;
+            font-weight: lighter;
+        }
+
+        & > div[class~="icon"] svg {
+            color: $secondary-color;
+        }
     }
 
     & > footer {
@@ -27,20 +43,54 @@
             width: 100%;
             padding: 0.5rem;
             opacity: 0.25;
-            transition-duration: 0.5s;
+            transition-duration: 0.25s;
 
-            &:hover {
+            &:hover:not(:disabled), &:focus:not(:disabled) {
                 // font-weight: bold;
                 opacity: 1;
             }
 
             &:first-child {
                 border-bottom-left-radius: calc(var(--radius) - 2px);
+
+                &:hover:not(:disabled), &:focus:not(:disabled) {
+                    background-color: rgba(rgb(185, 28, 28), 0.125);
+                    color: rgb(185, 28, 28);
+                }
             }
 
             &:last-child {
                 border-bottom-right-radius: calc(var(--radius) - 2px);
+
+                &:hover:not(:disabled), &:focus:not(:disabled) {
+                    background-color: rgba($secondary-layout, 0.125);
+                    color: $secondary-layout;
+                }
             }
         }
+    }
+
+    & > div[class~="loader"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        color: $secondary-layout;
+        border-radius: inherit;
+        background-color: rgba(white, 0.5);
+
+        & > svg {
+            filter:drop-shadow(0.06125rem 0.06125rem 0.06125rem $secondary-color)
+        }
+    }
+}
+
+@media (min-width: 310px) {
+    .fixedContainer {
+        padding: 1rem;
     }
 }

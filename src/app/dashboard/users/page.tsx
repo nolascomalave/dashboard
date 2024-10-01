@@ -19,6 +19,8 @@ import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Page() {
     const { data: session } = useSession(),
+        [ currentSelectedUser, setCurrentSelectedUser ] = useState<CompleteEntityUser | null>(null),
+        [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
         // router = useRouter(),
         pathname = usePathname(),
         [ users, setUsers ] = useState<CompleteEntityUser[]>([]);
@@ -36,9 +38,9 @@ export default function Page() {
     }),
     [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
 
-    const openActInactModal = () => {
+    const openActInactModal = (user: CompleteEntityUser) => {
+        setCurrentSelectedUser(user);
         setIsOpenActInactModal(true);
-        console.log('Is Opened!');
     }
 
     const fetchUsers = async () => {
@@ -70,6 +72,44 @@ export default function Page() {
                 duration: Infinity
             });
         }
+    }
+
+    const changingUserStatus = async (id_system_subscription_user: number, is_inactive: boolean) => {
+        setIsSettingUserStatus(true);
+
+        const ftc = new ClientFetch();
+
+        try {
+            const res = await ftc.patch({
+                url: `${process.env.API}/system-subscription-users/${is_inactive ? 'activate' : 'inactivate'}`,
+                data: {
+                    id_system_subscription_user
+                },
+                headers: {
+                    authorization: `Bearer ${session?.backendTokens.accessToken}`
+                }
+            });
+
+            if(res.status !== 200) {
+                if(res.status === 401) {
+                    // return router.push('/login');
+                }
+
+                throw 'error';
+            }
+
+            const { data } = await res.json();
+
+            console.log(data);
+        } catch(e: any) {
+            toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
+            });
+        }
+
+        setIsSettingUserStatus(false);
     }
 
     useEffect(() => {
@@ -130,6 +170,7 @@ export default function Page() {
                 <div key={key} className="flex justify-center">
                     <EntityCard
                         User = {user}
+                        CurrentUser = {(!!session && !!session.user && user.id_system_subscription_user === session.user.id) ? session.user : null}
                         hrefEdit = {`/dashboard/users/edit/${user.id_system_subscription_user}`}
                         image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
                         activateAction = { openActInactModal }
@@ -151,6 +192,17 @@ export default function Page() {
         <ConfirmModal
             isOpen = { isOpenActInactModal }
             setIsOpen = { setIsOpenActInactModal }
+            title = "Inactivate user"
+            showLoader = {isSettingUserStatus}
+            disabled = {isSettingUserStatus}
+            acceptAction = {() => changingUserStatus(currentSelectedUser?.id_system_subscription_user ?? 0, !!currentSelectedUser?.inactivated_at)}
+            text = {(
+                <>
+                    Are you sure to inactivate the user "<b>{currentSelectedUser?.username.toUpperCase()}</b>"?
+                    <br/>
+                    You can activate again in another moment.
+                </>
+            )}
         />
     </>
 }

@@ -19,6 +19,13 @@ export type FullUser = {
     phones: string | null;
     emails: string | null;
     is_admin: number | boolean;
+    inactivated_at_system: Date | null;
+    inactivated_at_system_subscription: Date | null;
+    inactivated_at_system_subscription_user: Date | null;
+    inactivated_by_system_subscription: Date | null;
+    inactivated_by_system_subscription_user: Date | null;
+    inactivated_at: Date | null;
+    inactivated_by: number | null;
     annulled_at_system: Date | null;
     annulled_at_system_subscription: Date | null;
     annulled_at_system_subscription_user: Date | null;
@@ -61,6 +68,13 @@ export type CompleteEntityUser = {
     phones: null | string[];
     emails: null | string[];
     is_admin: number | boolean;
+    inactivated_at_system: Date | null;
+    inactivated_at_system_subscription: Date | null;
+    inactivated_at_system_subscription_user: Date | null;
+    inactivated_by_system_subscription: Date | null;
+    inactivated_by_system_subscription_user: Date | null;
+    inactivated_at: Date | null;
+    inactivated_by: number | null;
     annulled_at_system: Date | null;
     annulled_at_system_subscription: Date | null;
     annulled_at_system_subscription_user: Date | null;
