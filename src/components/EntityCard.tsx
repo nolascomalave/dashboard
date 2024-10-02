@@ -82,7 +82,7 @@ export default function EntityCard({
                         )}
                     </button>
 
-                    {(User.inactivated_at ?? null) !== null ? (
+                    {(User.inactivated_at_system_subscription_user ?? null) !== null ? (
                         <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
                     ) : (
                         <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-emerald-700 border-emerald-700 opacity-75"}>Active</Badge>
@@ -101,7 +101,7 @@ export default function EntityCard({
                 { User.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
             </div>
 
-            {(!!User.is_admin && User.username.toLowerCase() === 'admin') ? null : (
+            {((!!User.is_admin && User.username.toLowerCase() === 'admin' && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) || (!!CurrentUser && CurrentUser.id === User.id_system_subscription_user)) ? null : (
                 <div className='flex pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
                     {/* <button
                         type='button'
@@ -109,7 +109,13 @@ export default function EntityCard({
                     >
                         View Profile
                     </button> */}
-                    {((User.inactivated_at ?? null) !== null && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) ? (
+                    <Link
+                        href = {hrefEdit}
+                        className='w-full text-center bg-white px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                    >
+                        Edit
+                    </Link>
+                    {((User.inactivated_at_system_subscription_user ?? null) !== null && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) ? (
                         <button
                             type='button'
                             className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
@@ -119,21 +125,13 @@ export default function EntityCard({
                         </button>
                     ) : (
                         <>
-                            <Link
-                                href = {hrefEdit}
-                                className='w-full text-center bg-white px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                            <button
+                                type='button'
+                                className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
+                                onClick={() => inactivateAction(User)}
                             >
-                                Edit
-                            </Link>
-                            {(!CurrentUser || CurrentUser.id !== User.id_system_subscription_user) && (
-                                <button
-                                    type='button'
-                                    className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
-                                    onClick={() => inactivateAction(User)}
-                                >
-                                    Inactivate
-                                </button>
-                            )}
+                                Inactivate
+                            </button>
                         </>
                     )}
                 </div>

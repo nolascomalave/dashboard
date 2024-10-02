@@ -17,7 +17,7 @@ type FetchOpts={
 }
 
 class Fetching {
-    protected controller:any;
+    protected controller?: AbortController | Aborter;
     protected fetchMethod:any = fetch;
     protected req_res: {req: NextApiRequest, res: NextApiResponse} | null = null;
 
@@ -138,8 +138,10 @@ class Fetching {
 }
 
 class ClientFetch extends Fetching {
-    constructor(){
+    constructor(aborter?: AbortController){
         super();
+
+        this.controller = aborter ?? new AbortController();
     }
 }
 

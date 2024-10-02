@@ -2,7 +2,7 @@
 
 import InputSearch from "@/components/InputSearch";
 import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 /* import Table from "@/components/Table"; */
@@ -17,7 +17,16 @@ import { CompleteEntityUser } from "@/assets/types/users";
 import ConfirmModal from "@/components/ConfirmModal";
 /* import { useRouter } from "next/router"; */
 
-export default function Page() {
+export default function Page({
+    searchParams = {
+        page: '1'
+    }
+}: {
+    searchParams?: {
+        query?: string;
+        page?: string;
+    };
+}) {
     const { data: session } = useSession(),
         [ currentSelectedUser, setCurrentSelectedUser ] = useState<CompleteEntityUser | null>(null),
         [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
@@ -36,7 +45,8 @@ export default function Page() {
         Inactive: true,
         Annulled: true
     }),
-    [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
+    [ isOpenActInactModal, setIsOpenActInactModal] = useState(false),
+    usersSearchAborter = useRef<ClientFetch | undefined>();
 
     const openActInactModal = (user: CompleteEntityUser) => {
         setCurrentSelectedUser(user);
@@ -44,11 +54,27 @@ export default function Page() {
     }
 
     const fetchUsers = async () => {
-        const ftc = new ClientFetch();
+        if(usersSearchAborter.current instanceof ClientFetch) {
+            usersSearchAborter.current.abort();
+        }
+
+        usersSearchAborter.current = new ClientFetch();
+
+        let params: string | string[] = [];
+
+        if('page' in searchParams) {
+            params.push(`page=${searchParams.page}`);
+        }
+
+        if('query' in searchParams) {
+            params.push(`search=${searchParams.query}`);
+        }
+
+        params = params.length < 1 ? '' : `?${params.join('&')}`;
 
         try {
-            const res = await ftc.get({
-                url: `${process.env.API}/system-subscription-users/`,
+            const res = await usersSearchAborter.current.get({
+                url: `${process.env.API}/system-subscription-users${params}`,
                 headers: {
                     authorization: `Bearer ${session?.backendTokens.accessToken}`
                 },
@@ -74,15 +100,16 @@ export default function Page() {
         }
     }
 
-    const changingUserStatus = async (id_system_subscription_user: number, is_inactive: boolean) => {
+    const changingUserStatus = async (closeModal: () => any, id_system_subscription_user: number, is_inactive: boolean) => {
         setIsSettingUserStatus(true);
 
         const ftc = new ClientFetch();
 
         try {
             const res = await ftc.patch({
-                url: `${process.env.API}/system-subscription-users/${is_inactive ? 'activate' : 'inactivate'}`,
+                url: `${process.env.API}/system-subscription-users/change-status`,
                 data: {
+                    type: is_inactive ? 'ACTIVE' : 'INACTIVE',
                     id_system_subscription_user
                 },
                 headers: {
@@ -98,9 +125,26 @@ export default function Page() {
                 throw 'error';
             }
 
-            const { data } = await res.json();
+            const { data, message } = await res.json();
 
-            console.log(data);
+            setTimeout(closeModal, 500);
+
+            setUsers(users.map(user => {
+                if(user.id_system_subscription_user !== data.id) {
+                    return user;
+                }
+
+                return {
+                    ...user,
+                    inactivated_at_system_subscription_user: data.inactivated_at,
+                    inactivated_by_systeinactivated_at_system_subscription_user: data.inactivated_by
+                };
+            }));
+
+            toast[is_inactive ? 'success' : 'warning'](message, {
+                position: 'bottom-right',
+                closeButton: true
+            });
         } catch(e: any) {
             toast.error('An unexpected error has occurred.', {
                 position: 'bottom-left',
@@ -121,6 +165,12 @@ export default function Page() {
             fetchUsers();
         }
     }, [session]);
+
+    useEffect(() => {
+        if(!!session) {
+            fetchUsers();
+        }
+    }, [searchParams]);
 
     return <>
         <div className="filters w-100 flex-shrink-0 flex justify-between gap-2">
@@ -195,7 +245,7 @@ export default function Page() {
             title = "Inactivate user"
             showLoader = {isSettingUserStatus}
             disabled = {isSettingUserStatus}
-            acceptAction = {() => changingUserStatus(currentSelectedUser?.id_system_subscription_user ?? 0, !!currentSelectedUser?.inactivated_at)}
+            acceptAction = {closeModal => changingUserStatus(closeModal, currentSelectedUser?.id_system_subscription_user ?? 0, !!currentSelectedUser?.inactivated_at_system_subscription_user)}
             text = {(
                 <>
                     Are you sure to inactivate the user "<b>{currentSelectedUser?.username.toUpperCase()}</b>"?
