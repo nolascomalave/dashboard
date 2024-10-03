@@ -84,7 +84,7 @@
         background-color: rgba(white, 0.5);
 
         & > svg {
-            filter:drop-shadow(0.06125rem 0.06125rem 0.06125rem $secondary-color)
+            filter: drop-shadow(0.06125rem 0.06125rem 0.06125rem $secondary-color);
         }
     }
 }

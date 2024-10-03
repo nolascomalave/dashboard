@@ -88,9 +88,9 @@ class Fetching {
 
         return fetch(opt.url, {
             ...opt,
-            agent: new https.Agent({
+            /* agent: new https.Agent({
                 rejectUnauthorized: false
-            })
+            }) */
         });
     }
 

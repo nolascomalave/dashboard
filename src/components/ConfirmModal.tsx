@@ -26,8 +26,8 @@ const backdrop = {
 };
 
 const dialog = {
-    visible: { scale: 1, rotate: 0 },
-    hidden: { scale: 0, rotate: -90 },
+    visible: { transform: "scale(1)" },
+    hidden: { transform: "translateY(50vh)" },
 }
 
 const ConfirmModal = ({

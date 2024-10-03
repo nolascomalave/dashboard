@@ -7,16 +7,20 @@ import /* useItemsSelector, */ { Checkbox } from '@/hooks/useItemsSelector';
 import { CompleteEntityUser } from '@/assets/types/users';
 import Link from 'next/link';
 import { Badge, badgeVariants } from "@/components/ui/badge";
+import ConfirmModal from './ConfirmModal';
+import { useState } from 'react';
+import { ClientFetch } from '@/util/Fetching';
+import { toast } from "sonner";
 
 export default function EntityCard({
+    session,
     image,
     selectableController,
     User,
     CurrentUser,
-    hrefEdit,
-    activateAction,
-    inactivateAction
+    hrefEdit
 }: {
+    session: any;
     image?: string,
     selectableController?: {
         keyItem?: string | number | symbol;
@@ -29,113 +33,193 @@ export default function EntityCard({
     };
     User: CompleteEntityUser;
     CurrentUser?: CompleteEntityUser | null;
-    hrefEdit: string;
-    activateAction: (User: CompleteEntityUser) => any;
-    inactivateAction: (User: CompleteEntityUser) => any;
+    hrefEdit: string
 }) {
-    const { keyItem, value, ...controller } = selectableController ?? {};
+    const [ userData, setUserData ] = useState<CompleteEntityUser>(User),
+        { keyItem, value, ...controller } = selectableController ?? {},
+        [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
+        [ isDisabledModal, setIsDisabledModal ] = useState<boolean>(false),
+        [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
+
+    const openActInactModal = () => {
+        setIsDisabledModal(false);
+        setIsOpenActInactModal(true);
+    };
+
+    const changingUserStatus = async (closeModal: () => any, id_system_subscription_user: number, is_inactive: boolean) => {
+        setIsSettingUserStatus(true);
+        setIsDisabledModal(true);
+
+        const ftc = new ClientFetch();
+
+        try {
+            const res = await ftc.patch({
+                url: `${process.env.API}/system-subscription-users/change-status`,
+                data: {
+                    type: is_inactive ? 'ACTIVE' : 'INACTIVE',
+                    id_system_subscription_user
+                },
+                headers: {
+                    authorization: `Bearer ${session?.backendTokens.accessToken}`
+                }
+            });
+
+            if(res.status !== 200) {
+                if(res.status === 401) {
+                    // return router.push('/login');
+                }
+
+                throw 'error';
+            }
+
+            const { data, message } = await res.json();
+
+            closeModal();
+
+            setUserData({
+                ...User,
+                inactivated_at_system_subscription_user: data.inactivated_at,
+                inactivated_by_system_subscription_user: data.inactivated_by
+            });
+
+            toast[is_inactive ? 'success' : 'warning'](message, {
+                position: 'bottom-right',
+                closeButton: true
+            });
+        } catch(e: any) {
+            toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
+            });
+        }
+
+        setIsSettingUserStatus(false);
+    };
 
     return (
-        <div
-            className={clsx({
-                [styles['entity-card']]: true,
-                'bg-white w-full flex flex-col': true
-            })}
-            style={{
-                boxShadow: '0px 9px 20px rgba(46, 35, 94, 0.07)',
-                maxWidth: '315px'
-            }}
-        >
-            <div className='px-4 pt-4'>
-                <div className='flex justify-center items-center margin-auto relative'>
-                    {(!!selectableController && (typeof keyItem === 'string' || typeof keyItem === 'number')) && (
-                        <Checkbox
-                            keyItem={keyItem}
-                            value={value}
-                            className='absolute top-0 left-0'
-                            {...(!selectableController ? {} : {controller: controller})}
-                        />
-                    )}
-
-                    <button
-                        type='button'
-                        className={clsx({
-                            'rounded-full text-primary_color duration-100 bg-primary_layout focus:bg-secondary_layout hover:bg-secondary_layout': true
-                        })}
-                        style={{
-                            width: '3rem',
-                            height: '3rem'
-                        }}
-                    >
-                        {!image ? (
-                            <UserRound
-                                width={10}
-                                height={10}
-                                className='w-full h-full object-cover object-center rounded-full'
-                            />
-                        ) : (
-                            <img
-                                className='w-full h-full object-cover object-center'
-                                src={image}
-                                alt={"Photo"}
+        <>
+            <div
+                className={clsx({
+                    [styles['entity-card']]: true,
+                    'bg-white w-full flex flex-col': true
+                })}
+                style={{
+                    boxShadow: '0px 9px 20px rgba(46, 35, 94, 0.07)',
+                    maxWidth: '315px'
+                }}
+            >
+                <div className='px-4 pt-4'>
+                    <div className='flex justify-center items-center margin-auto relative'>
+                        {(!!selectableController && (typeof keyItem === 'string' || typeof keyItem === 'number')) && (
+                            <Checkbox
+                                keyItem={keyItem}
+                                value={value}
+                                className='absolute top-0 left-0'
+                                {...(!selectableController ? {} : {controller: controller})}
                             />
                         )}
-                    </button>
 
-                    {(User.inactivated_at_system_subscription_user ?? null) !== null ? (
-                        <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
-                    ) : (
-                        <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-emerald-700 border-emerald-700 opacity-75"}>Active</Badge>
-                    )}
-                    {/* <button
-                        type='button'
-                        className='absolute top-0 right-0'
-                    >
-                        <Ellipsis width={15} height={15} />
-                    </button> */}
-                </div>
-            </div>
-            <div className='h-full text-center mt-2 mb-4'>
-                <p><b>{ User.name }</b></p>
-                <p>{ User.username.toUpperCase() }</p>
-                { User.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
-            </div>
-
-            {((!!User.is_admin && User.username.toLowerCase() === 'admin' && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) || (!!CurrentUser && CurrentUser.id === User.id_system_subscription_user)) ? null : (
-                <div className='flex pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
-                    {/* <button
-                        type='button'
-                        className='w-full px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
-                    >
-                        View Profile
-                    </button> */}
-                    <Link
-                        href = {hrefEdit}
-                        className='w-full text-center bg-white px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
-                    >
-                        Edit
-                    </Link>
-                    {((User.inactivated_at_system_subscription_user ?? null) !== null && (!CurrentUser || CurrentUser.id !== User.id_system_subscription_user)) ? (
                         <button
                             type='button'
-                            className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
-                            onClick={() => activateAction(User)}
+                            className={clsx({
+                                'rounded-full text-primary_color duration-100 bg-primary_layout focus:bg-secondary_layout hover:bg-secondary_layout': true
+                            })}
+                            style={{
+                                width: '3rem',
+                                height: '3rem'
+                            }}
                         >
-                            Activate
+                            {!image ? (
+                                <UserRound
+                                    width={10}
+                                    height={10}
+                                    className='w-full h-full object-cover object-center rounded-full'
+                                />
+                            ) : (
+                                <img
+                                    className='w-full h-full object-cover object-center'
+                                    src={image}
+                                    alt={"Photo"}
+                                />
+                            )}
                         </button>
-                    ) : (
-                        <>
+
+                        {(userData.inactivated_at_system_subscription_user ?? null) !== null ? (
+                            <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
+                        ) : (
+                            <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-emerald-700 border-emerald-700 opacity-75"}>Active</Badge>
+                        )}
+                        {/* <button
+                            type='button'
+                            className='absolute top-0 right-0'
+                        >
+                            <Ellipsis width={15} height={15} />
+                        </button> */}
+                    </div>
+                </div>
+                <div className='h-full text-center mt-2 mb-4'>
+                    <p><b>{ userData.name }</b></p>
+                    <p>{ userData.username.toUpperCase() }</p>
+                    { userData.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
+                </div>
+
+                {((!!userData.is_admin && userData.username.toLowerCase() === 'admin' && (!CurrentUser || CurrentUser.id !== userData.id_system_subscription_user)) || (!!CurrentUser && CurrentUser.id === userData.id_system_subscription_user)) ? null : (
+                    <div className='flex pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
+                        {/* <button
+                            type='button'
+                            className='w-full px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                        >
+                            View Profile
+                        </button> */}
+                        <Link
+                            href = {hrefEdit}
+                            className='w-full text-center bg-white px-2 py-1 duration-150 hover:text-secondary_layout focus:text-secondary_layout'
+                        >
+                            Edit
+                        </Link>
+                        {((userData.inactivated_at_system_subscription_user ?? null) !== null && (!CurrentUser || CurrentUser.id !== userData.id_system_subscription_user)) ? (
                             <button
                                 type='button'
-                                className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
-                                onClick={() => inactivateAction(User)}
+                                className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
+                                onClick={openActInactModal}
                             >
-                                Inactivate
+                                Activate
                             </button>
-                        </>
-                    )}
-                </div>
-            )}
-        </div>
+                        ) : (
+                            <>
+                                <button
+                                    type='button'
+                                    className='w-full bg-white px-2 py-1 duration-150 hover:text-red-700 focus:text-red-700'
+                                    onClick={openActInactModal}
+                                >
+                                    Inactivate
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <ConfirmModal
+                isOpen = { isOpenActInactModal }
+                setIsOpen = { setIsOpenActInactModal }
+                title = {(!!userData?.inactivated_at_system_subscription_user ? 'Activate' : 'Inactivate') + " user"}
+                showLoader = {isSettingUserStatus}
+                disabled = {isDisabledModal}
+                acceptAction = {closeModal => changingUserStatus(closeModal, userData?.id_system_subscription_user ?? 0, !!userData?.inactivated_at_system_subscription_user)}
+                text = {(
+                    <>
+                        Are you sure to {!!userData?.inactivated_at_system_subscription_user ? 'activate' : 'inactivate'} the user "<b>{userData?.username.toUpperCase()}</b>"?
+                        {!userData?.inactivated_at_system_subscription_user && (
+                            <>
+                                <br/>
+                                You can activate again in another moment.
+                            </>
+                        )}
+                    </>
+                )}
+            />
+        </>
     )
 }
