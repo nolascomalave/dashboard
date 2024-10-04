@@ -14,7 +14,8 @@ export default async function Page({ params: { id } }: { params: { id: string } 
       fn?: 'success' | 'error' | 'info' | 'warning';
       message: string;
       options?: undefined | {[key: string]: any};
-    } = null;
+    } = null,
+    toRedirect = false;
 
   try {
     const res = await ftc.get({
@@ -30,7 +31,7 @@ export default async function Page({ params: { id } }: { params: { id: string } 
     if(res.status === 400 || res.status === 500) {
       throw res.status;
     } else if(res.status === 401) {
-      return redirect('/login');
+      throw 'redirect';
     } else if(res.status === 404) {
       closeInmediatly = {
         fn: 'warning',
@@ -45,15 +46,23 @@ export default async function Page({ params: { id } }: { params: { id: string } 
 
     user = await res.json();
   } catch(e: any) {
-    closeInmediatly = {
-      fn: 'error',
-      message: 'An unexpected error has occurred.',
-      options: {
-        position: 'bottom-left',
-        closeButton: true,
-        duration: Infinity
-      }
-    };
+    if(e === 'redirect') {
+      toRedirect = true;
+  } else {
+      closeInmediatly = {
+          fn: 'error',
+          message: 'An unexpected error has occurred.',
+          options: {
+              position: 'bottom-left',
+              closeButton: true,
+              duration: Infinity
+          }
+      };
+  }
+  }
+
+  if(toRedirect) {
+      return redirect('/login');
   }
 
   return (

@@ -55,22 +55,38 @@ const FormInputContainer = ({children}: {children: React.ReactNode}) => (
 );
 
 export default function UserForm({
-    closeModal = () => undefined,
+    closeModal,
     className,
     user = undefined,
     isModal = false,
+    initialLoading = false,
     ...props
 }: {
-    user: undefined | CompleteEntityUser;
+    user?: CompleteEntityUser;
     closeModal?: () => void;
     className?: string;
     isModal: boolean;
     props?: any[];
+    initialLoading?: boolean;
 }) {
     const { data: session } = useSession(),
         router = useRouter(),
         [formID, setFormID] = useState<undefined | string>(undefined),
-        [isLoading, setIsLoading] = useState<boolean>(false),
+        [isLoading, setIsLoading] = useState<boolean>(initialLoading),
+        initialValues = {
+            photo: !user.photo ? null : undefined,
+            first_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+            second_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+            first_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+            second_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
+            address: user.address ?? '',
+            gender: user.gender ?? '',
+            ssn: user.documents === null ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+            email: user.emails === null ? '' : (user.emails[0]),
+            first_phone: user.phones === null ? '' : (user.phones[0]),
+            second_phone: user.phones === null ? '' : (user.phones[1] ?? ''),
+            address: user.address ?? ''
+        },
         {
             control,
             register,
@@ -83,23 +99,14 @@ export default function UserForm({
         } = useForm<Inputs>({
             resolver: zodResolver(userSchema),
             ...(!user ? {} : {
-                values: {
-                    photo: !user.photo ? null : undefined,
-                    first_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
-                    second_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
-                    first_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
-                    second_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
-                    address: user.address ?? '',
-                    gender: user.gender ?? '',
-                    ssn: user.documents === null ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
-                    email: user.emails === null ? '' : (user.emails[0]),
-                    first_phone: user.phones === null ? '' : (user.phones[0]),
-                    second_phone: user.phones === null ? '' : (user.phones[1] ?? ''),
-                    address: user.address ?? ''
-                }
+                values: initialValues
             })
         }),
         genderRegister = register("gender");
+
+    closeModal ??= () => {
+        router.push('/dashboard/users');
+    }
 
 
     const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
@@ -136,7 +143,6 @@ export default function UserForm({
                 'address': null,
                 'photo': null
             };
-            console.log(inputs.photo)
 
         if(!!inputs.photo) {
             data.append('photo', inputs.photo);
@@ -288,8 +294,11 @@ export default function UserForm({
     };
 
     useEffect(() => {
-        console.log(user);
-        setFormID(`user-form-${Date.now()}`)
+        setFormID(`user-form-${Date.now()}`);
+
+        if(initialLoading === true) {
+            setIsLoading(false);
+        }
     }, []);
 
     return (
@@ -299,7 +308,7 @@ export default function UserForm({
                 className="Modal__content__body"
                 onSubmit={handleSubmit(async (data) => {
                     toast.promise(onSubmit(data), {
-                        loading: 'Creating User...',
+                        initialLoading: 'Creating User...',
                         // success: () => `User was created`,
                         error: (error: string) => error,
                         closeButton: true
@@ -324,7 +333,10 @@ export default function UserForm({
                         <div
                             className="w-full"
                         >
-                            <div className="m-auto flex flex-col justify-center items-center gap-1.5">
+                            <div className={clsx({
+                                "m-auto flex flex-col justify-center items-center gap-1.5": true,
+                                "opacity-40": isLoading
+                            })}>
                                 <ImageCropSelector
                                     /* disabled = {photoRegister.disabled}
                                     max = {photoRegister.max}
@@ -337,6 +349,7 @@ export default function UserForm({
                                     pattern = {photoRegister.pattern}
                                     required = {photoRegister.required}
                                     refference = {photoRegister.ref} */
+                                    disabled={isLoading}
                                     initialImage = {!user ? undefined : (!user.photo ? undefined : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`)}
                                     name="photo"
                                     onChange={(e: { target: { name: 'photo', files: FileList } }) => {

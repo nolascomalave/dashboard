@@ -6,45 +6,47 @@ import UsersList from "./UsersList";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import DatalistSectionLoader from "@/components/DatalistSectionLoader";
+import FilterUsersList from "./FilterUsersList";
 
 export default async function Page({
     searchParams = {
-        page: '1'
+        page: '1',
     }
 }: {
     searchParams?: {
         query?: string;
         page?: string | number;
+        status?: string;
     };
 }) {
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
     const session = await getServerSession(authOptions);
 
+    let status = {
+        Active: true,
+        Inactive: true
+    };
+
+    if(!!searchParams) {
+        try {
+            status = JSON.parse(searchParams.status ?? '');
+        } catch(e: any) {
+            // No se captura el error.
+        }
+
+        Object.keys(status).forEach(el => {
+            status[el] = status[el] === false ? false : true;
+        });
+    }
+
     return <>
-        <div className="filters w-100 flex-shrink-0 flex justify-end gap-2">
-            <div className="flex items-center gap-2">
-                <InputSearch placeholder = 'Search...' />
-                <Link
-                    href="/dashboard/users/add"
-                    className="flex text-sm items-center gap-1 bg-primary_layout focus:outline-none hover:bg-secondary_layout text-white font-bold p-2 px-3 rounded"
-                >
-                    <Plus
-                        width={20}
-                        height={20}
-                        style={{
-                            width: '1rem',
-                            height: '1rem'
-                        }}
-                    />
-                    New
-                </Link>
-            </div>
-        </div>
+
+        <FilterUsersList {...searchParams} status={status} />
 
         <Suspense key={query + currentPage} fallback={<DatalistSectionLoader />}>
             <UsersList
-                searchParams = {searchParams}
+                searchParams = {{...searchParams, status}}
                 session={session}
             />
         </Suspense>

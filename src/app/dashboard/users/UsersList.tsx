@@ -1,34 +1,41 @@
 import { CompleteEntityUser } from "@/assets/types/users";
 import DatalistSectionMessage from "@/components/DatalistSectionMessage";
 import EntityCard from "@/components/EntityCard";
+import Formats from '@/util/Formats';
 
 export default async function UsersList({
     searchParams = {},
     session
 }: {
     searchParams: {
-        query?: string;
+        search?: string;
         page?: number | string;
+        status?: {
+            Active?: boolean;
+            Inactive?: boolean;
+        }
     };
     session: any;
 }) {
     const users: CompleteEntityUser[] = [];
 
-    let params: string | string[] = [],
+    let params: string | {[key: string | number | symbol]: any} = {},
         error = null;
 
     if('page' in searchParams && searchParams.page !== undefined) {
-        params.push(`page=${parseInt(typeof searchParams.page === 'string' ? searchParams.page : searchParams.page.toString())}`);
+        params.page = searchParams.page;
     }
 
-    if('query' in searchParams && searchParams.query !== undefined) {
-        params.push(`search=${searchParams.query.trim()}`);
+    if('search' in searchParams && searchParams.search !== undefined) {
+        params.search = searchParams.search;
     }
 
-    params = params.length < 1 ? '' : `?${params.join('&')}`;
+    if('status' in searchParams && searchParams.status !== undefined) {
+        params.status = searchParams.status;
+    }
 
     try {
-        const res = await fetch(`${process.env.API}/system-subscription-users${params}`, {
+        const res = await fetch(`${process.env.API}/system-subscription-users${!searchParams ? '' : ('?' + Formats.objectToParams(params))}`, {
             headers: {
                 authorization: `Bearer ${session?.backendTokens.accessToken}`
             },

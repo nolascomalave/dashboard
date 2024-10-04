@@ -1,62 +1,101 @@
+'use client';
+
 import { DropdownMenuCheckboxes } from "@/components/DropDownCheckboxes";
-import InputSearch from "@/components/InputSearch";
-import { Link, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from 'next/link'
 import styles from '@/components/InputSearch.module.scss';
 import clsx from "clsx";
 import { useDebouncedCallback } from "use-debounce";
+import { toast } from "sonner";
 
 const initialStatus = {
     Active: true,
     Inactive: true
 }
 
-export default function FilterUsersList() {
+export default function FilterUsersList({
+    search,
+    status: queryStatus
+}: {
+    search?: string;
+    status?: {
+        Active: boolean;
+        Inactive: boolean;
+    };
+}) {
     const { replace } = useRouter(),
         searchParams = useSearchParams(),
-        [ status, setStatus ] = useState<{Active: boolean, Inactive: boolean}>(initialStatus),
+        [ status, setStatus ] = useState<{Active: boolean, Inactive: boolean}>(queryStatus ?? initialStatus),
         pathname = usePathname();
 
-    const handleSearch = useDebouncedCallback((term: string) => {
+    const handleSearch = useDebouncedCallback((query?: {name: string, value: string}) => {
         const params = new URLSearchParams(searchParams);
 
-        // params.set('page', '1');
-
-        if (term.trim()) {
-            params.set('query', term);
-        } else {
-            params.delete('query');
+        if(query !== undefined) {
+            if (query.value.trim()) {
+                params.set(query.name, query.value);
+            } else {
+                params.delete(query.name);
+            }
         }
 
         replace(`${pathname}?${params.toString()}`);
     }, 300);
 
+    const handleStatusChange = (name: string, val: boolean) => {
+        const existsActive = Object.keys(status).some((el: string) => ((el === name ? val : status[el]) === true));
+
+        if(!existsActive) {
+            return toast.error("You can't uncheck all status", {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: 3000
+            });
+        }
+
+        setStatus({...status, [name]: val});
+    };
+
     useEffect(() => {
-        handleSearch
+        let statusQuery: string | string[] = [];
+
+        Object.keys(initialStatus).forEach(el => {
+            statusQuery.push(`"${el}":${(!(el in status) || status[el] === false) ? false : true}`);
+        });
+
+        statusQuery = `{${statusQuery.join(',')}}`;
+
+        handleSearch({name: 'status', value: statusQuery});
     }, [status]);
 
     return (
-        <>
+        <div className="filters w-100 flex-shrink-0 flex justify-between gap-2">
             <DropdownMenuCheckboxes
                 title="Filter"
                 Icon="SlidersHorizontal"
                 options = {[
                     {
-                        title: 'Active',
-                        state: status.Active,
-                        setState: (val: boolean) => setStatus({...status, Active: val})
-                    },
-                    {
-                        title: 'Inactive',
-                        state: status.Inactive,
-                        setState: (val: boolean) => setStatus({...status, Inactive: val})
-                    }/* ,
-                    {
-                        title: 'Annulled',
-                        state: status.Annulled,
-                        setState: (val: boolean) => setStatus({...status, Annulled: val})
-                    } */
+                        title: 'Status',
+                        options: [
+                            {
+                                title: 'Active',
+                                state: status.Active,
+                                setState: (val: boolean) => handleStatusChange('Active', val)
+                            },
+                            {
+                                title: 'Inactive',
+                                state: status.Inactive,
+                                setState: (val: boolean) => handleStatusChange('Inactive', val)
+                            }/* ,
+                            {
+                                title: 'Annulled',
+                                state: status.Annulled,
+                                setState: (val: boolean) => setStatus({...status, Annulled: val})
+                            } */
+                        ]
+                    }
                 ]}
             />
 
@@ -78,8 +117,11 @@ export default function FilterUsersList() {
                             type="text" id="voice-search"
                             className={"border border-gray-300 text-sm rounded-lg block w-full p-2 pe-10"}
                             placeholder={'Search...'}
-                            // onChange={(e) => handleSearch(e.target.value)}
-                            defaultValue={searchParams.get('query')?.toString()}
+                            onChange={(e) => handleSearch({
+                                name: "search",
+                                value: e.target.value
+                            })}
+                            defaultValue={search/* searchParams.get('query')?.toString() */}
                             required
                         />
                         <Search
@@ -105,6 +147,6 @@ export default function FilterUsersList() {
                     New
                 </Link>
             </div>
-        </>
+        </div>
     );
 }

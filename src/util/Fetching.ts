@@ -146,7 +146,7 @@ class ClientFetch extends Fetching {
 }
 
 class ServerFetch extends Fetching {
-    constructor(req_res: any | null){
+    constructor(req_res?: any | null){
         super();
 
         if(!!req_res) this.req_res = req_res;

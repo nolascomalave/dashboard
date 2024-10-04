@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import * as LucideReact from 'lucide-react';
 
 // import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ export function DropdownMenuCheckboxes({
             }
 
             return (
-                <>
+                <React.Fragment key={i}>
                     {IconElement && (
                         <IconElement
                             width={20}
@@ -99,11 +99,15 @@ export function DropdownMenuCheckboxes({
                             key={'item-' + i + '-option-' + index}
                             checked={el.state}
                             onCheckedChange={el.setState}
+                            onClickCapture={(e) => {
+                                e.stopPropagation();
+                                el.setState(!el.state);
+                            }}
                         >
                             {el.title}
                         </DropdownMenuCheckboxItem>
                     ))}
-                </>
+                </React.Fragment>
             );
         })}{/* 
         <DropdownMenuLabel>Status</DropdownMenuLabel>

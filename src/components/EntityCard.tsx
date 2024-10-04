@@ -8,7 +8,7 @@ import { CompleteEntityUser } from '@/assets/types/users';
 import Link from 'next/link';
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import ConfirmModal from './ConfirmModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ClientFetch } from '@/util/Fetching';
 import { toast } from "sonner";
 
@@ -96,6 +96,10 @@ export default function EntityCard({
 
         setIsSettingUserStatus(false);
     };
+
+    useEffect(() => {
+        setUserData(User);
+    }, [User]);
 
     return (
         <>
