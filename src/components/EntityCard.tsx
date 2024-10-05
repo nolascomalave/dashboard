@@ -92,6 +92,7 @@ export default function EntityCard({
                 closeButton: true,
                 duration: Infinity
             });
+            setIsDisabledModal(false);
         }
 
         setIsSettingUserStatus(false);
