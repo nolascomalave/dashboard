@@ -12,6 +12,7 @@ import { ClientFetch } from "@/util/Fetching.js";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
+import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
 import * as API_consts from '@/assets/API_Constants';
 
 import {
@@ -74,18 +75,17 @@ export default function UserForm({
         [formID, setFormID] = useState<undefined | string>(undefined),
         [isLoading, setIsLoading] = useState<boolean>(initialLoading),
         initialValues = {
-            photo: !user.photo ? null : undefined,
-            first_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
-            second_name: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
-            first_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
-            second_surname: (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
-            address: user.address ?? '',
-            gender: user.gender ?? '',
-            ssn: user.documents === null ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
-            email: user.emails === null ? '' : (user.emails[0]),
-            first_phone: user.phones === null ? '' : (user.phones[0]),
-            second_phone: user.phones === null ? '' : (user.phones[1] ?? ''),
-            address: user.address ?? ''
+            photo: (!user || !user.photo )? null : undefined,
+            first_name: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+            second_name: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+            first_surname: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+            second_surname: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
+            address: !user ? '' : (user.address ?? ''),
+            gender: !user ? '' : (user.gender ?? ''),
+            ssn: (!user || user.documents === null) ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+            email: (!user || user.emails === null) ? '' : (user.emails[0]),
+            first_phone: (!user || user.phones === null) ? '' : (user.phones[0]),
+            second_phone: (!user || user.phones === null) ? '' : (user.phones[1] ?? '')
         },
         {
             control,
@@ -103,6 +103,8 @@ export default function UserForm({
             })
         }),
         genderRegister = register("gender");
+
+    const { setUser } = useProcessedCompleteEntity();
 
     closeModal ??= () => {
         router.push('/dashboard/users');
@@ -273,6 +275,8 @@ export default function UserForm({
                             position: 'bottom-right',
                             closeButton: true,
                         });
+
+                        setUser(response.data.fullUser);
 
                         return closeModal();
                     }

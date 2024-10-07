@@ -87,7 +87,7 @@ export default function AsideNavbar() {
             <header className='Navbar__header'>
                 <Link href={'/dashboard'} className="flex items-center gap-1">
                     <Image
-                        src="/Images/IRMS-Logo.svg"
+                        src="/Images/logo.png" // src="/Images/IRMS-Logo.svg"
                         alt="IRMS Logo"
                         width={100}
                         height={100}

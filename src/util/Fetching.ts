@@ -14,6 +14,7 @@ type FetchOpts={
     data?: any;
     signal?: AbortSignal;
     credentials?: any;
+    cache?: "no-store" | string;
 }
 
 class Fetching {

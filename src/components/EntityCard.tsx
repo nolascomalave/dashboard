@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import styles from './EntityCard.module.scss';
 import { Ellipsis, UserRound } from 'lucide-react';
 import /* useItemsSelector, */ { Checkbox } from '@/hooks/useItemsSelector';
+import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
 import { CompleteEntityUser } from '@/assets/types/users';
 import Link from 'next/link';
 import { Badge, badgeVariants } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ export default function EntityCard({
         [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
         [ isDisabledModal, setIsDisabledModal ] = useState<boolean>(false),
         [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
+    const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state);
 
     const openActInactModal = () => {
         setIsDisabledModal(false);
@@ -102,6 +104,15 @@ export default function EntityCard({
         setUserData(User);
     }, [User]);
 
+    useEffect(() => {
+        if(!processedUser || processedUser.id_system_subscription_user != userData.id_system_subscription_user) {
+            return;
+        }
+
+        setUserData(processedUser);
+        setUser(null);
+    }, [processedUser]);
+
     return (
         <>
             <div
@@ -125,17 +136,16 @@ export default function EntityCard({
                             />
                         )}
 
-                        <button
-                            type='button'
+                        <div
                             className={clsx({
-                                'rounded-full text-primary_color duration-100 bg-primary_layout focus:bg-secondary_layout hover:bg-secondary_layout': true
+                                'rounded-full text-primary_color duration-100 bg-primary_layout': true
                             })}
                             style={{
                                 width: '3rem',
                                 height: '3rem'
                             }}
                         >
-                            {!image ? (
+                            {(!userData.photo || userData.photo.trim().length < 1) ? (
                                 <UserRound
                                     width={10}
                                     height={10}
@@ -143,12 +153,12 @@ export default function EntityCard({
                                 />
                             ) : (
                                 <img
-                                    className='w-full h-full object-cover object-center'
-                                    src={image}
+                                    className='w-full h-full object-cover object-center rounded-full'
+                                    src={`${process.env.API}/storage/entity/entity-${userData.id_entity}/${userData.photo}`}
                                     alt={"Photo"}
                                 />
                             )}
-                        </button>
+                        </div>
 
                         {(userData.inactivated_at_system_subscription_user ?? null) !== null ? (
                             <Badge variant = "outline" className={"absolute top-0 right-0 text-[0.6rem] text-red-700 border-red-700 opacity-75"}>Inactive</Badge>
@@ -164,7 +174,14 @@ export default function EntityCard({
                     </div>
                 </div>
                 <div className='h-full text-center mt-2 mb-4'>
-                    <p><b>{ userData.name }</b></p>
+                    <p>
+                        <Link
+                            href = {`/dashboard/users/${userData.id_system_subscription_user}`}
+                            className='font-bold cursor-pointer focus:underline focus:decoration-solid hover:underline hover:decoration-solid'
+                        >
+                            { userData.name }
+                        </Link>
+                    </p>
                     <p>{ userData.username.toUpperCase() }</p>
                     { userData.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
                 </div>

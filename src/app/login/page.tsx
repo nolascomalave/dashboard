@@ -145,7 +145,7 @@ export default function Login() {
                     <div className={`login-page__container__front-page rounded-r-sm py-12 px-8 hidden sm:block bg-primary_layout w-full sm:w-[50%] text-primary_color text-[0.75rem]`}>
                         <header className=''>
                             <Image
-                                src="/Images/IRMS-Logo.svg"
+                                src="/Images/logo.png" // src="/Images/IRMS-Logo.svg"
                                 alt="IRMS Logo"
                                 width={100}
                                 height={100}
