@@ -1,6 +1,8 @@
 .Profile {
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
+    align-items: start;
+    justify-content: center;
     gap: 1rem;
     width: 100%;
     height: 100%;

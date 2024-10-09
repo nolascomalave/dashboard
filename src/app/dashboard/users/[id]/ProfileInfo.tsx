@@ -5,6 +5,8 @@ import { getUser } from '../actions';
 export default async function ProfileInfo({ id }: { id: string }) {
     const { user } = await getUser(id);
 
+    await new Promise(res => setTimeout(() => res(true), 10000));
+
     return (
         <div className='info'>
             <div className='entity-card'>
