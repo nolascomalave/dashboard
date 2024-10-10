@@ -18,7 +18,8 @@ export async function getUser(id: number | string) {
             message: string;
             options?: undefined | {[key: string]: any};
         } = null,
-        toRedirect = false;
+        toRedirect = false,
+        status: undefined | number = undefined;
 
     try {
         const res = await ftc.get({
@@ -48,6 +49,7 @@ export async function getUser(id: number | string) {
             };
         }
 
+        status = res.status;
         user = await res.json();
     } catch(e: any) {
         if(e === 'redirect') {
@@ -71,6 +73,7 @@ export async function getUser(id: number | string) {
 
     return {
         user,
-        closeInmediatly
+        closeInmediatly,
+        status
     };
 }

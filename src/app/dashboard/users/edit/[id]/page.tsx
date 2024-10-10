@@ -2,9 +2,14 @@
 
 import UserForm from '@/layouts/UserForm';
 import { getUser } from '../../actions';
+import { notFound } from 'next/navigation';
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
-    const { user } = await getUser(id);
+    const { user, status } = await getUser(id);
+
+    if(status === 404 || !user) {
+        return notFound();
+    }
 
     return (
         <div
