@@ -74,6 +74,7 @@ export async function getUser(id: number | string) {
     return {
         user,
         closeInmediatly,
-        status
+        status,
+        session
     };
 }
