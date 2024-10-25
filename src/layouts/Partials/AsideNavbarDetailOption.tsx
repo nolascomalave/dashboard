@@ -1,7 +1,7 @@
 'use client';
 import { Component, RefObject, createRef } from 'react';
 import styles from './AsideNavbarDetailOption.module.scss';
-import NavButton from './NavButton';
+import NavButton from '../NavButton';
 import * as LudiceIcons from 'lucide-react';
 import { clsx } from 'clsx';
 

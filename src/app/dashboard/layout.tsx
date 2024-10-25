@@ -1,6 +1,6 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from 'next-auth';
-import AsideNavbar from '@/layouts/AsideNavbar';
+import AsideNavbar from '@/layouts/Partials/AsideNavbar';
 import { redirect } from 'next/navigation';
 
 export default async function Layout({ children, usersModals }: { children: React.ReactNode, usersModals: React.ReactNode }) {

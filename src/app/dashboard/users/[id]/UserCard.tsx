@@ -30,7 +30,8 @@ export default function UserCard({
     const [ userData, setUserData ] = useState<CompleteEntityUser>(user),
         [ isDisabledModal, setIsDisabledModal ] = useState<boolean>(false),
         [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
-        [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
+        [ isOpenActInactModal, setIsOpenActInactModal] = useState(false),
+        [ isOpenConfirmResetPassword, setIsOpenConfirmResetPassword] = useState(false);
     const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state),
         [ userEmails, setUserEmails ] = useState<string[]>(userData.emails ?? []),
         [ userPhones, setUserPhones ] = useState<string[]>(userData.phones ?? []),
@@ -81,6 +82,51 @@ export default function UserCard({
             });
 
             toast[is_inactive ? 'success' : 'warning'](message, {
+                position: 'bottom-right',
+                closeButton: true
+            });
+        } catch(e: any) {
+            toast.error('An unexpected error has occurred.', {
+                position: 'bottom-left',
+                closeButton: true,
+                duration: Infinity
+            });
+            setIsDisabledModal(false);
+        }
+
+        setIsSettingUserStatus(false);
+    };
+
+    const resetUserPassword = async (closeModal: () => any) => {
+        setIsSettingUserStatus(true);
+        setIsDisabledModal(true);
+
+        const ftc = new ClientFetch();
+
+        try {
+            const res = await ftc.patch({
+                url: `${process.env.API}/system-subscription-users/reset-password`,
+                data: {
+                    id_system_subscription_user: user.id_system_subscription_user
+                },
+                headers: {
+                    authorization: `Bearer ${session?.backendTokens.accessToken}`
+                }
+            });
+
+            if(res.status !== 200) {
+                if(res.status === 401) {
+                    // return router.push('/login');
+                }
+
+                throw 'error';
+            }
+
+            const { data, message } = await res.json();
+
+            closeModal();
+
+            toast.success(message, {
                 position: 'bottom-right',
                 closeButton: true
             });
@@ -233,7 +279,7 @@ export default function UserCard({
                         </SimpleTooltip>
                     )}
 
-                    {(isAdminSession || (!isUserSessionAndUserSame && !isAdminUser)) && (
+                    {(!isUserSessionAndUserSame && (isAdminSession || !isAdminUser)) && (
                         <SimpleTooltip text={(!!userData.inactivated_at_system_subscription_user || !!userData.inactivated_at) ? 'Activate' : 'Inactivate'} >
                             <button
                                 type='button'
@@ -249,9 +295,16 @@ export default function UserCard({
                         </SimpleTooltip>
                     )}
 
-                    {(isAdminSession || isUserSessionAndUserSame) && (
+                    {(((isAdminSession && !isAdminUser) || isUserSessionAndUserSame) && !userData.inactivated_at_system_subscription_user && !userData.inactivated_at) && (
                         <SimpleTooltip text={'Change Password'} >
-                            <button type='button' className='flex justify-center items-center w-full bg-white px-3 py-2'>
+                            <button
+                                type='button'
+                                className='flex justify-center items-center w-full bg-white px-3 py-2'
+                                onClick={() => isUserSessionAndUserSame ? router.push(`/dashboard/users/change-password`) : (() => {
+                                    setIsDisabledModal(false);
+                                    setIsOpenConfirmResetPassword(true);
+                                })}
+                            >
                                 <KeyRound />
                             </button>
                         </SimpleTooltip>
@@ -275,6 +328,20 @@ export default function UserCard({
                                 You can activate again in another moment.
                             </>
                         )}
+                    </>
+                )}
+            />
+
+            <ConfirmModal
+                isOpen = { isOpenConfirmResetPassword }
+                setIsOpen = { setIsOpenConfirmResetPassword }
+                title = {"Reset User Password"}
+                showLoader = {isSettingUserStatus}
+                disabled = {isDisabledModal}
+                acceptAction = {resetUserPassword}
+                text = {(
+                    <>
+                        Are you sure to reset the "<b>{userData?.username.toUpperCase()}</b>" user password?
                     </>
                 )}
             />

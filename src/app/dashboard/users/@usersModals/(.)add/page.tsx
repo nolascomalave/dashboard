@@ -21,5 +21,5 @@ export default async function Page() {
           className='px-4 py-2'
         />
     </Modal>
-  )
+  );
 }

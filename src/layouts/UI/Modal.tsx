@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 export function Modal({
     title,
     closeInmediatly = null,
-    children
+    children,
+    passCloseFunction = true
 }: {
     title: any;
     closeInmediatly: null | {
@@ -20,7 +21,8 @@ export function Modal({
         message: string;
         options?: undefined | {[key: string]: any};
     };
-    children: React.ReactNode;
+    children: React.ReactNode | string;
+    passCloseFunction?: boolean;
 }) {
   const router = useRouter(),
     Title = !((typeof title === 'string') || (typeof title === 'number') ) ? title : null;
@@ -79,7 +81,7 @@ export function Modal({
                     </button>
                 </header>
 
-                {React.cloneElement(children, { closeModal })}
+                { passCloseFunction ? React.cloneElement(children, { closeModal }) : children }
             </div>
         </div>
     ),
