@@ -76,13 +76,13 @@ export default function UserForm({
         [isLoading, setIsLoading] = useState<boolean>(initialLoading),
         initialValues = {
             photo: (!user || !user.photo )? null : undefined,
-            first_name: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
-            second_name: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
-            first_surname: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
-            second_surname: !user ? '' : (user.names_obj.find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
+            first_name: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+            second_name: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+            first_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+            second_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
             address: !user ? '' : (user.address ?? ''),
             gender: !user ? '' : (user.gender ?? ''),
-            ssn: (!user || user.documents === null) ? '' : (user.documents.find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+            ssn: (!user || user.documents === null) ? '' : ((user.documents ?? []).find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
             email: (!user || user.emails === null) ? '' : (user.emails[0]),
             first_phone: (!user || user.phones === null) ? '' : (user.phones[0]),
             second_phone: (!user || user.phones === null) ? '' : (user.phones[1] ?? '')

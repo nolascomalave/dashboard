@@ -5,8 +5,7 @@ import { Modal } from '@/layouts/UI/Modal';
 import { getUser } from '../../actions';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import UserForm from '@/layouts/UserForm';
-import { Input } from '@/components/ui/input';
+import ChangePasswordForm from '@/layouts/ChangePasswordForm';
 
 export default async function Page() {
     const session = await getServerSession(authOptions);
@@ -20,8 +19,19 @@ export default async function Page() {
     const { user, closeInmediatly } = await getUser(session.id);
 
     return (
-        <Modal title = {"New User"} closeInmediatly={null} passCloseFunction={false} >
-            Holas
+        <Modal
+            title = {"Change Password"}
+            closeInmediatly={null}
+            // passCloseFunction={false}
+            ModalContentClass='w-full'
+            ModalContentStyles={{
+                maxWidth: '20rem'
+            }}
+        >
+            <ChangePasswordForm
+                session={session}
+                User={user}
+            />
         </Modal>
     );
 }

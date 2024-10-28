@@ -267,7 +267,7 @@ export default function UserCard({
                 )} */}
 
                 <div className='flex rounded-b-sm pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
-                    {(isAdminSession || (isAdminUser && session.user.id === userData.id_system_subscription_user) || !isAdminUser) && (
+                    {((isAdminSession || (isAdminUser && session.user.id === userData.id_system_subscription_user) || !isAdminUser) && !(isAdminUser && userData.username.toLowerCase() === 'admin')) && (
                         <SimpleTooltip text={'Edit'} >
                             <button
                                 type='button'
@@ -296,11 +296,11 @@ export default function UserCard({
                     )}
 
                     {(((isAdminSession && !isAdminUser) || isUserSessionAndUserSame) && !userData.inactivated_at_system_subscription_user && !userData.inactivated_at) && (
-                        <SimpleTooltip text={'Change Password'} >
+                        <SimpleTooltip text={(isUserSessionAndUserSame ? 'Change' : 'Reset').concat(' Password')} >
                             <button
                                 type='button'
                                 className='flex justify-center items-center w-full bg-white px-3 py-2'
-                                onClick={() => isUserSessionAndUserSame ? router.push(`/dashboard/users/change-password`) : (() => {
+                                onClick={isUserSessionAndUserSame ? () => router.push(`/dashboard/users/change-password`) : (() => {
                                     setIsDisabledModal(false);
                                     setIsOpenConfirmResetPassword(true);
                                 })}

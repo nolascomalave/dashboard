@@ -1,3 +1,5 @@
+@import '../../assets/scss/vars.module.scss';
+
 .Modal {
     z-index: 1;
     box-sizing: border-box;
@@ -24,6 +26,24 @@
         *[class~="Modal__content__body"] {
             max-height: inherit;
             overflow: auto;
+        }
+
+        div[class~="Modal__content__loader"] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            color: $secondary-layout;
+            border-radius: calc(0.5rem - 2px);
+            background-color: rgba(white, 0.5);
+
+            & > svg {
+                filter: drop-shadow(0.06125rem 0.06125rem 0.06125rem $secondary-color);
+            }
         }
     }
 }

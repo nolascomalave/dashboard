@@ -5,6 +5,8 @@ import { getUser } from '../../../actions';
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const { user, closeInmediatly } = await getUser(id);
 
+  console.log(user);
+
   return (
     <Modal
       title = {"Edit User"}
