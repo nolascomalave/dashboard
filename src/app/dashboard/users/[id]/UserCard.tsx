@@ -159,7 +159,7 @@ export default function UserCard({
     return (
         <>
             <div
-                className='entity-card bg-white rounded-sm w-full'
+                className='entity-card rounded-sm w-full'
             >
                 <div className='p-3 rounded-t-sm'>
                     <div

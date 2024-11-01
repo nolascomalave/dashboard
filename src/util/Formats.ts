@@ -11,4 +11,14 @@ export default class Formats {
         var up = new URLSearchParams(paresConRepe);
         return up.toString();
     }
+
+    public static getJsonFromString(string: any) {
+        if(typeof string === 'object') return string;
+
+        try {
+            return JSON.parse(string);
+        } catch(e: any) {
+            return null;
+        }
+    }
 }

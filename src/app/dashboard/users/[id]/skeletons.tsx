@@ -53,3 +53,50 @@ export function ProfileInfoSkeleton() {
         </div>
     )
 }
+
+export function QuotationsSkeleton() {
+    return (
+        <div className="h-full w-full">
+            <Skeleton className="w-full flex flex-col bg-gray-200 m-auto p-[0.06125rem]">
+                <div className="bg-fond w-full flex-shrink-0">
+                    <div className="p-3 ps-4">
+                        <Skeleton className="h-6 w-[10rem] bg-gray-200" />
+                    </div>
+                    <Skeleton className="h-[0.06125rem] w-full bg-gray-200" />
+                </div>
+                <div className="bg-fond">
+                    <Skeleton className="pb-[0.06125rem] w-full bg-gray-200">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[50%] bg-gray-200" />
+                        </div>
+                    </Skeleton>
+                    <Skeleton className="pb-[0.06125rem] w-full bg-gray-200">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[75%] bg-gray-200" />
+                        </div>
+                    </Skeleton>
+                    <Skeleton className="pb-[0.06125rem] w-full bg-gray-200">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[60%] bg-gray-200" />
+                        </div>
+                    </Skeleton>
+                    <Skeleton className="pb-[0.06125rem] w-full bg-gray-200">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[37%] bg-gray-200" />
+                        </div>
+                    </Skeleton>
+                    <Skeleton className="pb-[0.06125rem] w-full bg-gray-200">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[49%] bg-gray-200" />
+                        </div>
+                    </Skeleton>
+                    <div className="pb-[0.06125rem] w-full">
+                        <div className="bg-fond h-full p-3">
+                            <Skeleton className="h-4 w-[50%] bg-gray-200" />
+                        </div>
+                    </div>
+                </div>
+            </Skeleton>
+        </div>
+    );
+}

@@ -27,13 +27,15 @@ export default function ChangePasswordForm({
     // backOnClose = false,
     session,
     closeModal,
-    setIsDisabledCloseBtnModal
+    setIsDisabledCloseBtnModal,
+    FormContainerStyle
 }: {
     // backOnClose?: boolean,
     session?: Session;
     closeModal?: () => void;
     isDisabledCloseBtnModal?: boolean;
     setIsDisabledCloseBtnModal?: (val: boolean) => void;
+    FormContainerStyle?: Properties<string | number, string & {}>;
 }) {
     const [formID, setFormID] = useState<undefined | string>(undefined),
         router = useRouter(),
@@ -56,7 +58,7 @@ export default function ChangePasswordForm({
             }
         });
 
-    closeModal ??= () => router.push('/dashboard/users');
+    closeModal ??= () => router.push('/dashboard');
 
     const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
         setIsLoading(true);
@@ -140,6 +142,7 @@ export default function ChangePasswordForm({
             <form
                 className="Modal__content__body flex flex-col px-4 py-2 gap-2"
                 id={formID}
+                style={FormContainerStyle}
                 onSubmit={handleSubmit(async (data) => {
                     if(data.new_password !== data.confirm_new_password) {
                         return setError('confirm_new_password', {
