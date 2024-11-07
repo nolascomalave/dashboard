@@ -40,9 +40,13 @@ const getHeaderLevel = (header: any): {header: any, level: number} => {
 }
 
 export default function Table({
-	columns = []
+	columns = [],
+	headerLayoutConfig = {},
+	cellLayoutConfig = {}
 } : {
-	columns: AccessorFnColumnDefBase<any>
+	columns: AccessorFnColumnDefBase<any>,
+	headerLayoutConfig: { [key: string | number | symbol]: any };
+	cellLayoutConfig: { [key: string | number | symbol]: any };
 }) {
 	const [sorting, setSorting] = useState<string[]>([]);
 	const [filtering, setFiltering] = useState<string>('');
@@ -111,21 +115,22 @@ export default function Table({
 												return null;
 											}
 
-											console.log(columnsRows[header.column.id].header);
-
 											return (
 												<th
+													{...(headerLayoutConfig[header.column.id] ?? {})}
 													key={header.id}
 													colSpan={header.colSpan}
 													rowSpan={columnsRows[header.column.id].level}
 													onClick={header.column.getToggleSortingHandler()}
 												>
-													<div className="flex justify-center items-center gap-2">
-														<span>
-															{flexRender(columnsRows[header.column.id].header.column.columnDef.header, columnsRows[header.column.id].header.getContext())}
-														</span>
-														{OrderIcon && <OrderIcon width={10} heigth={10} />}
-													</div>
+													{!columnsRows[header.column.id].header.column.columnDef.header ? null : (
+														<div className="flex justify-center items-center gap-2">
+															<span>
+																{flexRender(columnsRows[header.column.id].header.column.columnDef.header, columnsRows[header.column.id].header.getContext())}
+															</span>
+															{OrderIcon && <OrderIcon width={15} heigth={15} />}
+														</div>
+													)}
 												</th>
 											)
 										})
@@ -139,7 +144,7 @@ export default function Table({
 					{table.getRowModel().rows.map(row => (
 						<tr key={row.id}>
 							{row.getVisibleCells().map(cell => (
-								<td key={cell.id}>
+								<td key={cell.id} {...(cellLayoutConfig[cell.column.id] ?? {})}>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								</td>
 							))}
@@ -147,21 +152,29 @@ export default function Table({
 					))}
 				</tbody>
 				<tfoot>
-					{table.getFooterGroups().map(footerGroup => (
-						<tr key={footerGroup.id}>
-							{footerGroup.headers.map(header => (
-								<th key={header.id}>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-											header.column.columnDef.footer,
-											header.getContext()
-										)
-									}
-								</th>
-							))}
-						</tr>
-					))}
+					{(() => {
+						const firstFooterRow = headerGroups[0] ?? null,
+							lastFooterRow = headerGroups[headerGroups.length - 1] ?? null;
+
+						if(!firstFooterRow) {
+							return null;
+						}
+
+						return (
+							<tr key={firstFooterRow.id}>
+								{lastFooterRow.headers.map(header => header.isPlaceholder ? null :(
+									<td key={header.id} {...(cellLayoutConfig[header.column.id] ?? {})}>
+										{
+											flexRender(
+												header.column.columnDef.footer,
+												header.getContext()
+											)
+										}
+									</td>
+								))}
+							</tr>
+						);
+					})()}
 				</tfoot>
 			</table>
 

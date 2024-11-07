@@ -8,7 +8,7 @@ const columnHelper = createColumnHelper();
 const columns = [
     columnHelper.display({
         id: '#',
-        header: '#',
+        header: '',
         cell: (props) => props.cell.row.index + 1,
         footer: (props) => props.table.getPaginationRowModel().rows.length ?? 0
     }),
@@ -25,12 +25,28 @@ const columns = [
         ]}
     ]},
     { header: "Total", accessorKey: "total"/* , footer: '' */ },
-];
+],
+headerLayoutConfig = {
+    '#': {
+        style: {
+            width: 0
+        }
+    }
+},
+cellLayoutConfig = {
+    '#': {
+        style: {
+            textAlign: 'right'
+        }
+    }
+};
 
 export default function QuotationsTable() {
     return (
         <Table
             columns = {columns}
+            headerLayoutConfig = {headerLayoutConfig}
+            cellLayoutConfig = {cellLayoutConfig}
         />
     );
 }
