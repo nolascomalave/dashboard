@@ -15,16 +15,11 @@ const columns = [
     { header: "Quotation Number", accessorKey: "quote_num"/* , footer: '' */ },
     { header: "Quotation to", accessorKey: "customer"/* , footer: '' */ },
     { header: "Status", accessorKey: "status"/* , footer: '' */ },
-    { header: "Cost", accessorKey: "cost"/* , footer: '' */ },
-    { header: "Taxe"/* , footer: '' */, columns: [
-        { header: "Total 1", accessorKey: "total1"/* , footer: '' */ },
-        { header: "Total 2"/* , footer: '' */ , columns: [
-            { header: "Total 3", accessorKey: "total3"/* , footer: '' */ },
-            { header: "Total 4", accessorKey: "total4"/* , footer: '' */ },
-            { header: "Total 5", accessorKey: "total5"/* , footer: '' */ }
-        ]}
-    ]},
-    { header: "Total", accessorKey: "total"/* , footer: '' */ },
+    { header: "Amount", columns: [
+        { header: "Cost", accessorKey: "cost" },
+        { header: "Taxe", accessorKey: "taxe" },
+        { header: "Total", accessorKey: "total" }
+    ]}
 ],
 headerLayoutConfig = {
     '#': {

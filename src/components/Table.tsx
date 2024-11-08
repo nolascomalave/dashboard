@@ -1,7 +1,7 @@
 'use client';
 
 import { AccessorFnColumnDefBase, buildHeaderGroups, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import data from '@/assets/jsons/MOCK_DATA.json';
+// import data from '@/assets/jsons/MOCK_DATA.json';
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -40,6 +40,7 @@ const getHeaderLevel = (header: any): {header: any, level: number} => {
 }
 
 export default function Table({
+	data = [],
 	columns = [],
 	headerLayoutConfig = {},
 	cellLayoutConfig = {}
@@ -47,6 +48,7 @@ export default function Table({
 	columns: AccessorFnColumnDefBase<any>,
 	headerLayoutConfig: { [key: string | number | symbol]: any };
 	cellLayoutConfig: { [key: string | number | symbol]: any };
+	data: { [key: string | number | symbol]: any }[]
 }) {
 	const [sorting, setSorting] = useState<string[]>([]);
 	const [filtering, setFiltering] = useState<string>('');
@@ -78,7 +80,8 @@ export default function Table({
 		},
 		onColumnOrderChange: setSorting
 	}),
-	headerGroups = table.getHeaderGroups();
+	headerGroups = table.getHeaderGroups(),
+	rowsModel = table.getRowModel().rows;
 
 	/* useEffect(() => {
 		console.log(table.getFooterGroups());
@@ -141,15 +144,27 @@ export default function Table({
 					}
 				</thead>
 				<tbody>
-					{table.getRowModel().rows.map(row => (
-						<tr key={row.id}>
-							{row.getVisibleCells().map(cell => (
-								<td key={cell.id} {...(cellLayoutConfig[cell.column.id] ?? {})}>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
-						</tr>
-					))}
+					{(() => {
+						if(rowsModel.length < 1) {
+							const headers = (headerGroups[headerGroups.length - 1] ?? {}).headers;
+
+							return (
+								<tr>
+									<td colSpan={headers.length} className={styles.noDataMessage}>No Data</td>
+								</tr>
+							);
+						}
+
+						return rowsModel.map(row => (
+							<tr key={row.id}>
+								{row.getVisibleCells().map(cell => (
+									<td key={cell.id} {...(cellLayoutConfig[cell.column.id] ?? {})}>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</td>
+								))}
+							</tr>
+						));
+					})()}
 				</tbody>
 				<tfoot>
 					{(() => {
@@ -164,12 +179,12 @@ export default function Table({
 							<tr key={firstFooterRow.id}>
 								{lastFooterRow.headers.map(header => header.isPlaceholder ? null :(
 									<td key={header.id} {...(cellLayoutConfig[header.column.id] ?? {})}>
-										{
+										{rowsModel.length ? (
 											flexRender(
 												header.column.columnDef.footer,
 												header.getContext()
 											)
-										}
+										) : <div className="py-2"></div>}
 									</td>
 								))}
 							</tr>

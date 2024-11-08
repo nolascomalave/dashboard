@@ -8,11 +8,14 @@ $borderColorTbody: $fond;
 $secondaryRowBackground: darken($fond, 2.5);
 
 .TableContainer {
+    display: flex;
     width: 100%;
     height: 100%;
     border-radius: $border-radius;
     font-size: 0.85rem;
     overflow-y: auto;
+    border: 0.06125em solid $borderColorThead;
+    // background-color: $fond;
 
     &::-webkit-scrollbar-track {
         border-radius: 2rem;
@@ -44,6 +47,8 @@ $secondaryRowBackground: darken($fond, 2.5);
             border-top-right-radius: $border-radius;
             user-select: none;
             background-color: $borderColorThead;
+            border-bottom: 0.06125em solid $borderColorThead;
+            box-shadow: 0 0 0 0.06125em $borderColorThead;
 
             tr {
                 border-top: 0.06125em solid transparent;
@@ -93,6 +98,21 @@ $secondaryRowBackground: darken($fond, 2.5);
                         }
                     }
                 }
+
+                th:last-child {
+                    border-right: none;
+
+                    &::before {
+                        right: 0;
+                    }
+                }
+
+                &:last-child {
+                    th:last-child {
+                        position: relative;
+                        border-right: none;
+                    }
+                }
             }
 
             &:has(tr:nth-child(2)) {
@@ -112,6 +132,8 @@ $secondaryRowBackground: darken($fond, 2.5);
         }
 
         tbody {
+            background-color: white;
+
             tr {
                 border-bottom: 0.06125em solid $borderColorTbody;
 
@@ -150,25 +172,32 @@ $secondaryRowBackground: darken($fond, 2.5);
             bottom: 0;
             border-bottom-left-radius: $border-radius;
             border-bottom-right-radius: $border-radius;
+            border-top: 0.06125em solid $borderColorThead;
+            box-shadow: 0 0 0 0.06125em $borderColorThead;
             color: $theadColor;
             user-select: none;
             background-color: $fond;
 
-            tr {
-                position: relative;
-                border-right: 0.06125em solid transparent;
+            tr td {
+                border-right: 0.06125em solid $borderColorThead;
 
-                &::after {
-                    content: '';
-                    position: absolute;
-                    top: -0.125em;
-                    right: -0.125em;
-                    bottom: 0;
-                    left: -0.125em;
-                    background-color: $borderColorThead;
-                    z-index: -1;
+                &:last-child {
+                    border-right: none;
                 }
             }
         }
+    }
+}
+
+
+.noDataMessage {
+    min-height: max-content;
+    height: 20vh;
+    text-align: center;
+    color: $theadColor;
+    background-color: white !important;
+
+    &:hover {
+        background-color: white;
     }
 }
