@@ -12,24 +12,24 @@ import { useRouter } from "next/navigation";
 
 const menuData = [
     {
-        title: 'Warehouse',
-        Icon: 'Warehouse',
+        title: 'Customers',
+        Icon: 'CircleUserRound',
         options: [
             {
-                href: '/products',
-                title: 'Warehouse',
-                Icon: 'Warehouse'
+                href: '/customers',
+                title: 'Customers',
+                Icon: 'CircleUserRound'
             }
         ]
     },
     {
         title: 'Users',
-        Icon: 'Users',
+        Icon: 'UserRoundCog',
         options: [
             {
                 href: '/users',
                 title: 'Users',
-                Icon: 'Users'
+                Icon: 'UserRoundCog'
             }
         ]
     }
@@ -118,7 +118,7 @@ export default function AsideNavbar() {
 
             <ul className="Navbar__menu">
                 {menuData.map((el, i) => {
-                    const Icon = LudiceIcons['Users'];
+                    const Icon = LudiceIcons[el.Icon];
                     return (
                         <li key={i}>
                             <AsideNavbarDetailOption

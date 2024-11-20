@@ -1,9 +1,9 @@
-import { CompleteEntityUser } from "@/assets/types/users";
+import { CompleteEntity } from "@/assets/types/entity";
 import DatalistSectionMessage from "@/components/DatalistSectionMessage";
-import UserCard from "@/components/UserCard";
+import EntityCard from "@/components/EntityCard";
 import Formats from '@/util/Formats';
 
-export default async function UsersList({
+export default async function CustomersList({
     searchParams = {},
     session
 }: {
@@ -17,7 +17,7 @@ export default async function UsersList({
     };
     session: any;
 }) {
-    const users: CompleteEntityUser[] = [];
+    const entities: CompleteEntity[] = [];
 
     let params: string | {[key: string | number | symbol]: any} = {},
         error = null;
@@ -35,7 +35,7 @@ export default async function UsersList({
     }
 
     try {
-        const res = await fetch(`${process.env.API}/system-subscription-users${!searchParams ? '' : ('?' + Formats.objectToParams(params))}`, {
+        const res = await fetch(`${process.env.API}/entity${!searchParams ? '' : ('?' + Formats.objectToParams(params))}`, {
             headers: {
                 authorization: `Bearer ${session?.backendTokens.accessToken}`
             },
@@ -51,10 +51,10 @@ export default async function UsersList({
 
         const { data } = await res.json();
 
-        users.push(...(data ?? []));
+        entities.push(...(data ?? []));
     } catch(e: any) {
-        // throw new Error('Failed to fetch users.');
-        error = 'Failed to fetch users';
+        // throw new Error('Failed to fetch entities.');
+        error = 'Failed to fetch customers';
         /* toast.error('An unexpected error has occurred.', {
             position: 'bottom-left',
             closeButton: true,
@@ -64,18 +64,18 @@ export default async function UsersList({
 
     return (
         <>
-            {(!error && users.length > 0) ? (
+            {(!error && entities.length > 0) ? (
                 <div
                     className={"w-full h-full grid grid-cols-1 sm:grid-cols-2 grid-rows-none content-start lg:grid-cols-3 xl:grid-cols-4 grid-flow-row gap-4 md:gap-8"}
                 >
-                    {users.map((user, key: number) => (
+                    {entities.map((user, key: number) => (
                         <div key={key} className="flex justify-center">
-                            <UserCard
+                            <EntityCard
                                 session={session}
-                                User = {user}
-                                CurrentUser = {(!!session && !!session.user && user.id_system_subscription_user === session.user.id) ? session.user : null}
-                                hrefEdit = {`/dashboard/users/edit/${user.id_system_subscription_user}`}
-                                image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
+                                Entity = {user}
+                                CurrentEntity = {(!!session && !!session.user && user.id_system_subscription_user === session.user.id) ? session.user : null}
+                                hrefEdit = {`/dashboard/customers/edit/${user.id_system_subscription_user}`}
+                                // image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
                                 /* activateAction = { openActInactModal } */
                                 /* inactivateAction = { openActInactModal } */
                             />
