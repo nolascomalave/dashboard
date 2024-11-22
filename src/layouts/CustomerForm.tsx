@@ -82,7 +82,7 @@ export default function UserForm({
         [formID, setFormID] = useState<undefined | string>(undefined),
         [isLoading, setIsLoading] = useState<boolean>(initialLoading),
         initialValues = {
-            is_natural: true,
+            is_natural: !customer ? true : (customer.is_natural == 1),
             business_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.bussiness_name) ?? {names: ['']}).names[0],
             comercial_designation: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.comercial_designation) ?? {names: ['']}).names[0],
             photo: (!customer || !customer.photo )? null : undefined,
@@ -91,7 +91,7 @@ export default function UserForm({
             first_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
             second_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
             address: !customer ? '' : (customer.address ?? ''),
-            gender: !customer ? '' : (customer.gender ?? ''),
+            gender: (!customer || !(customer.is_natural == 1)) ? '' : (customer.gender ?? ''),
             ssn: (!customer || customer.documents === null) ? '' : ((customer.documents ?? []).find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
             email: (!customer || customer.emails === null) ? '' : (customer.emails[0]),
             first_phone: (!customer || customer.phones === null) ? '' : (customer.phones[0]),
@@ -129,8 +129,8 @@ export default function UserForm({
         let names = [],
             inputFields: { [key: string]: null | {field: string; alias: string}} = {
                 'names.0': {
-                    field: 'first_name',
-                    alias: 'First name'
+                    field: inputs.is_natural === true ? 'first_name' : 'business_name',
+                    alias: inputs.is_natural === true ? 'First name' : 'Business name'
                 },
                 'phones.0': {
                     field: 'first_phone',
@@ -162,57 +162,72 @@ export default function UserForm({
         }
 
         names.push({
-            name: inputs.first_name,
-            id_entity_name_type: API_consts.entity_name_type.name,
+            name: inputs[inputs.is_natural ? 'first_name' : 'business_name'],
+            id_entity_name_type: API_consts.entity_name_type[inputs.is_natural ? 'name' : 'bussiness_name'],
             order: 1
         });
 
-        if((inputs.second_name ?? '').trim().length > 0) {
+        if(inputs.is_natural) {
+            if((inputs.second_name ?? '').trim().length > 0) {
+                names.push({
+                    name: inputs.second_name,
+                    id_entity_name_type: API_consts.entity_name_type.name,
+                    order: 2
+                });
+
+                inputFields['names.1'] = {
+                    field: 'second_name',
+                    alias: 'Second name'
+                };
+            }
+        } else if((inputs.comercial_designation ?? '').trim().length > 0) {
             names.push({
-                name: inputs.second_name,
-                id_entity_name_type: API_consts.entity_name_type.name,
+                name: inputs.comercial_designation,
+                id_entity_name_type: API_consts.entity_name_type.comercial_designation,
                 order: 2
             });
 
             inputFields['names.1'] = {
-                field: 'second_name',
-                alias: 'Second name'
+                field: 'comercial_designation',
+                alias: 'Comercial designation'
             };
         }
 
-        names.push({
-            name: inputs.first_surname,
-            id_entity_name_type: API_consts.entity_name_type.surname,
-            order: 1
-        });
-
-        inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.2' : 'names.1'] = {
-            field: 'first_surname',
-            alias: 'First surname'
-        };
-
-        if((inputs.second_surname ?? '').trim().length > 0) {
+        if(inputs.is_natural) {
             names.push({
-                name: inputs.second_surname,
+                name: inputs.first_surname,
                 id_entity_name_type: API_consts.entity_name_type.surname,
-                order: 2
+                order: 1
             });
 
-            inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.3' : 'names.2'] = {
-                field: 'second_surname',
-                alias: 'Second surname'
+            inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.2' : 'names.1'] = {
+                field: 'first_surname',
+                alias: 'First surname'
             };
+
+            if((inputs.second_surname ?? '').trim().length > 0) {
+                names.push({
+                    name: inputs.second_surname,
+                    id_entity_name_type: API_consts.entity_name_type.surname,
+                    order: 2
+                });
+
+                inputFields[(inputs.second_name ?? '').trim().length > 0 ? 'names.3' : 'names.2'] = {
+                    field: 'second_surname',
+                    alias: 'Second surname'
+                };
+            }
+
+            data.append('gender', inputs.gender);
+
+            data.append('documents', JSON.stringify([{
+                document: inputs.ssn,
+                id_entity_document_category: 1,
+                order: 1
+            }]));
         }
 
         data.append('names', JSON.stringify(names));
-
-        data.append('gender', inputs.gender);
-
-        data.append('documents', JSON.stringify([{
-            document: inputs.ssn,
-            id_entity_document_category: 1,
-            order: 1
-        }]));
 
         if((inputs.second_phone ?? '').toString().trim().length > 0) {
             // phones.push(inputs.second_phone);
@@ -228,7 +243,7 @@ export default function UserForm({
             data.append('address', inputs.address.trim());
         }
 
-        data.append('is_natural', 'true');
+        data.append('is_natural', inputs.is_natural == true ? 'true' : 'false');
 
         /* let newData: {[key: string]: any} = {};
 
@@ -345,6 +360,39 @@ export default function UserForm({
                             maxWidth: '100%'
                         }}
                     >
+                        <Controller
+                            name="is_natural"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="w-full flex mb-2">
+                                    <div className="flex gap-4 text-center">
+                                        <div className="flex-shrink-0">
+                                            <Label htmlFor={field.name}>Person Type:</Label>
+                                        </div>
+                                        <div className={clsx("flex gap-4 font-extralight justify-center items-center", styles["switch-content-withFors"])}>
+                                            <p
+                                                className="w-full cursor-pointer text-right switch-for"
+                                                onClick={(event: any) => field.onChange({target: {name: field.name, value: false}})}
+                                            >
+                                                Legal
+                                            </p>
+                                            <CheckSwitch
+                                                name={field.name}
+                                                id={field.name}
+                                                className="flex-shrink-0"
+                                                checked={field.value} onChange={(event: any) => field.onChange({target: {name: field.name, value: event.target.checked}})}
+                                            />
+                                            <p
+                                                className="w-full cursor-pointer text-left switch-for"
+                                                onClick={(event: any) => field.onChange({target: {name: field.name, value: true}})}
+                                            >
+                                                Natural
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        />
 
                         <div
                             className="w-full"
@@ -369,152 +417,120 @@ export default function UserForm({
                         <Controller
                             name="is_natural"
                             control={control}
-                            render={({ field: is_naturalField }) => (
+                            render={({ field: is_naturalField }) => (is_naturalField.value === true ? (
                                 <>
-                                    <div className="w-full flex">
-                                        <div className="flex gap-2 flex-col text-center">
-                                            <div>
-                                                <Label htmlFor={is_naturalField.name}>Person Type</Label>
-                                            </div>
-                                            <div className={clsx("flex gap-4 font-extralight justify-center", styles["switch-content-withFors"])}>
-                                                <p
-                                                    className="w-full cursor-pointer text-right switch-for"
-                                                    onClick={(event: any) => is_naturalField.onChange({target: {name: is_naturalField.name, value: false}})}
+                                    <FormInputContainer>
+                                        <Label htmlFor="first_name">First Name</Label>
+                                        <Input
+                                            type="string"
+                                            id="first_name"
+                                            {...register("first_name", {disabled: isLoading})}
+                                            placeholder="Name"
+                                        />
+                                        {errors.first_name?.message && <FormErrorMessage>{errors.first_name?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+
+                                    <FormInputContainer>
+                                        <Label htmlFor="second_name">Second Name</Label>
+                                        <Input
+                                            type="string"
+                                            id="second_name"
+                                            {...register("second_name", {disabled: isLoading})}
+                                            placeholder="Name"
+                                        />
+                                        {errors.second_name?.message && <FormErrorMessage>{errors.second_name?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+
+                                    <FormInputContainer>
+                                        <Label htmlFor="first_surname">First Surname</Label>
+                                        <Input
+                                            type="string"
+                                            id="first_surname"
+                                            {...register("first_surname", {disabled: isLoading})}
+                                            placeholder="Surname"
+                                        />
+                                        {errors.first_surname?.message && <FormErrorMessage>{errors.first_surname?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+
+                                    <FormInputContainer>
+                                        <Label htmlFor="second_surname">Second Surname</Label>
+                                        <Input
+                                            type="string"
+                                            id="second_surname"
+                                            {...register("second_surname", {disabled: isLoading})}
+                                            placeholder="Surname"
+                                        />
+                                        {errors.second_surname?.message && <FormErrorMessage>{errors.second_surname?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+
+                                    <FormInputContainer>
+                                        <Label htmlFor="gender">Gender</Label>
+                                        <Controller
+                                            name="gender"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    name={field.name}
+                                                    disabled={field.disabled}
+                                                    required={genderRegister.required}
+                                                    onValueChange={(val: string) => field.onChange({target: {name: field.name, value: val}})}
+                                                    value={field.value}
                                                 >
-                                                    Legal
-                                                </p>
-                                                <CheckSwitch
-                                                    name={is_naturalField.name}
-                                                    id={is_naturalField.name}
-                                                    className="flex-shrink-0"
-                                                    checked={is_naturalField.value} onChange={(event: any) => is_naturalField.onChange({target: {name: is_naturalField.name, value: event.target.checked}})}
-                                                />
-                                                <p
-                                                    className="w-full cursor-pointer text-left switch-for"
-                                                    onClick={(event: any) => is_naturalField.onChange({target: {name: is_naturalField.name, value: true}})}
-                                                >
-                                                    Natural
-                                                </p>
-                                            </div>
-                                        </div>
+                                                    <SelectTrigger id="gender" className="w-full">
+                                                        <SelectValue placeholder="Select a gender" />
+                                                    </SelectTrigger>
+                                                    <SelectContent ref={field.ref}>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Gender</SelectLabel>
+                                                            {Object.keys(genders).map((el: string, i: number) => {
+                                                                return (
+                                                                    <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
+                                                                );
+                                                            })}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        {errors.gender?.message && <FormErrorMessage>{errors.gender?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+
+                                    <FormInputContainer>
+                                        <Label htmlFor="ssn">SSN</Label>
+                                        <Input
+                                            type="string"
+                                            id="ssn"
+                                            {...register("ssn", {disabled: isLoading})}
+                                            placeholder="Social Security Number"
+                                        />
+                                        {errors.ssn?.message && <FormErrorMessage>{errors.ssn?.message}</FormErrorMessage>}
+                                    </FormInputContainer>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-full items-center gap-1.5">
+                                        <Label htmlFor="business_name">Business Name</Label>
+                                        <Input
+                                            type="string"
+                                            id="business_name"
+                                            {...register("business_name", {disabled: isLoading})}
+                                            placeholder="Business Name"
+                                        />
+                                        {errors.business_name?.message && <FormErrorMessage>{errors.business_name?.message}</FormErrorMessage>}
                                     </div>
 
-                                    { is_naturalField.value === true ? (
-                                        <>
-                                            <FormInputContainer>
-                                                <Label htmlFor="first_name">First Name</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="first_name"
-                                                    {...register("first_name", {disabled: isLoading})}
-                                                    placeholder="Name"
-                                                />
-                                                {errors.first_name?.message && <FormErrorMessage>{errors.first_name?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-
-                                            <FormInputContainer>
-                                                <Label htmlFor="second_name">Second Name</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="second_name"
-                                                    {...register("second_name", {disabled: isLoading})}
-                                                    placeholder="Name"
-                                                />
-                                                {errors.second_name?.message && <FormErrorMessage>{errors.second_name?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-
-                                            <FormInputContainer>
-                                                <Label htmlFor="first_surname">First Surname</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="first_surname"
-                                                    {...register("first_surname", {disabled: isLoading})}
-                                                    placeholder="Surname"
-                                                />
-                                                {errors.first_surname?.message && <FormErrorMessage>{errors.first_surname?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-
-                                            <FormInputContainer>
-                                                <Label htmlFor="second_surname">Second Surname</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="second_surname"
-                                                    {...register("second_surname", {disabled: isLoading})}
-                                                    placeholder="Surname"
-                                                />
-                                                {errors.second_surname?.message && <FormErrorMessage>{errors.second_surname?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-
-                                            <FormInputContainer>
-                                                <Label htmlFor="gender">Gender</Label>
-                                                <Controller
-                                                    name="gender"
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <Select
-                                                            name={field.name}
-                                                            disabled={field.disabled}
-                                                            required={genderRegister.required}
-                                                            onValueChange={(val: string) => field.onChange({target: {name: field.name, value: val}})}
-                                                            value={field.value}
-                                                        >
-                                                            <SelectTrigger id="gender" className="w-full">
-                                                                <SelectValue placeholder="Select a gender" />
-                                                            </SelectTrigger>
-                                                            <SelectContent ref={field.ref}>
-                                                                <SelectGroup>
-                                                                    <SelectLabel>Gender</SelectLabel>
-                                                                    {Object.keys(genders).map((el: string, i: number) => {
-                                                                        return (
-                                                                            <SelectItem key={i} value={el}>{genders[el]}</SelectItem>
-                                                                        );
-                                                                    })}
-                                                                </SelectGroup>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    )}
-                                                />
-                                                {errors.gender?.message && <FormErrorMessage>{errors.gender?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-
-                                            <FormInputContainer>
-                                                <Label htmlFor="ssn">SSN</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="ssn"
-                                                    {...register("ssn", {disabled: isLoading})}
-                                                    placeholder="Social Security Number"
-                                                />
-                                                {errors.ssn?.message && <FormErrorMessage>{errors.ssn?.message}</FormErrorMessage>}
-                                            </FormInputContainer>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="w-full items-center gap-1.5">
-                                                <Label htmlFor="business_name">Business Name</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="business_name"
-                                                    {...register("business_name", {disabled: isLoading})}
-                                                    placeholder="Business Name"
-                                                />
-                                                {errors.business_name?.message && <FormErrorMessage>{errors.business_name?.message}</FormErrorMessage>}
-                                            </div>
-
-                                            <div className="w-full items-center gap-1.5">
-                                                <Label htmlFor="comercial_designation">Comercial Designation</Label>
-                                                <Input
-                                                    type="string"
-                                                    id="comercial_designation"
-                                                    {...register("comercial_designation", {disabled: isLoading})}
-                                                    placeholder="Comercial Designation"
-                                                />
-                                                {errors.comercial_designation?.message && <FormErrorMessage>{errors.comercial_designation?.message}</FormErrorMessage>}
-                                            </div>
-                                        </>
-                                    )}
+                                    <div className="w-full items-center gap-1.5">
+                                        <Label htmlFor="comercial_designation">Comercial Designation</Label>
+                                        <Input
+                                            type="string"
+                                            id="comercial_designation"
+                                            {...register("comercial_designation", {disabled: isLoading})}
+                                            placeholder="Comercial Designation"
+                                        />
+                                        {errors.comercial_designation?.message && <FormErrorMessage>{errors.comercial_designation?.message}</FormErrorMessage>}
+                                    </div>
                                 </>
-                            )}
+                            ))}
                         />
 
                         <FormInputContainer>

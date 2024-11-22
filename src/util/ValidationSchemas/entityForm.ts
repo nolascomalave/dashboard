@@ -49,7 +49,7 @@ export const entitySchema = z.object({
         .optional()
         .or(z.literal('')),
     gender: z
-        .enum(Object.keys(genders), {
+        .enum(['', ...Object.keys(genders)], {
             errorMap: () => ({ message: "Please select a gender" }),
         })
         .optional(),
