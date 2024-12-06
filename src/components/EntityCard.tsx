@@ -123,8 +123,8 @@ export default function EntityCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent hideWhenDetached className="bg-primary_layout text-primary_color">
                                 <DropdownMenuItem className='flex items-center gap-2 w-full h-full cursor-pointer' onClick={() => router.push(`/dashboard/customers/edit/${entityData.id}`)}>
-                                        <Edit className='w-4 h-4' width={10} height={10}/>
-                                        Editar
+                                    <Edit className='w-4 h-4' width={10} height={10}/>
+                                    Editar
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
