@@ -1,3 +1,5 @@
+'use server';
+
 import { CompleteEntity } from "@/assets/types/entity";
 import DatalistSectionMessage from "@/components/DatalistSectionMessage";
 import EntityCard from "@/components/EntityCard";
@@ -39,6 +41,7 @@ export default async function CustomersList({
             headers: {
                 authorization: `Bearer ${session?.backendTokens.accessToken}`
             },
+            cache: 'no-store'
         });
 
         if(res.status !== 200) {
@@ -83,7 +86,7 @@ export default async function CustomersList({
                     ))}
                 </div>
             ) : (
-                <DatalistSectionMessage isError={!!error}>{!error ? 'Users not found!' : error}</DatalistSectionMessage>
+                <DatalistSectionMessage isError={!!error}>{!error ? 'Customers not found!' : error}</DatalistSectionMessage>
             )}
         </>
     );

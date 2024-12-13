@@ -12,7 +12,7 @@ import { ClientFetch } from "@/util/Fetching.js";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import * as API_consts from '@/assets/API_Constants';
 import styles from '@/layouts/UI/CheckSwitch.module.scss';
 
@@ -60,7 +60,7 @@ const FormInputContainer = ({children}: {children: React.ReactNode}) => (
     </div>
 );
 
-export default function UserForm({
+export default function CustomerForm({
     closeModal,
     className,
     customer = undefined,
@@ -75,8 +75,6 @@ export default function UserForm({
     props?: any[];
     initialLoading?: boolean;
 }) {
-    console.clear();
-    console.log(customer);
     const { data: session } = useSession(),
         router = useRouter(),
         [formID, setFormID] = useState<undefined | string>(undefined),
@@ -113,8 +111,6 @@ export default function UserForm({
             })
         }),
         genderRegister = register("gender");
-
-    const { setUser } = useProcessedCompleteEntity();
 
     closeModal ??= () => {
         router.push('/dashboard/customers');
@@ -245,14 +241,6 @@ export default function UserForm({
 
         data.append('is_natural', inputs.is_natural == true ? 'true' : 'false');
 
-        /* let newData: {[key: string]: any} = {};
-
-        for (const key of data.keys()) {
-            newData[key] = data.get(key);
-        }
-
-        delete newData.photo; */
-
         try {
             const res = await ftc.post({
                 url: `${process.env.API}/entity${!customer ? '' : `/${customer.id}`}`,
@@ -297,14 +285,12 @@ export default function UserForm({
                             throw 'error';
                         }
                     } else {
-                        toast.success(`User was ${!customer ? 'created' : 'updated'}`, {
+                        toast.success(`Customer was ${!customer ? 'created' : 'updated'}`, {
                             position: 'bottom-right',
                             closeButton: true,
                         });
 
-                        setUser(response.data.fullUser);
-
-                        return closeModal();
+                        closeModal();
                     }
                     break;
                 case 500:
@@ -314,11 +300,6 @@ export default function UserForm({
         } catch(e: any) {
             console.log(e)
             setIsLoading(false);
-            /* toast.error('An unexpected error has occurred.', {
-                position: 'bottom-left',
-                closeButton: true,
-                duration: Infinity
-            }); */
             throw 'An unexpected error has occurred.';
         }
     };
@@ -328,6 +309,10 @@ export default function UserForm({
 
         if(initialLoading === true) {
             setIsLoading(false);
+        }
+
+        return () => {
+            router.refresh();
         }
     }, []);
 

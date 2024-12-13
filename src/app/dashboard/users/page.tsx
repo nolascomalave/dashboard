@@ -1,3 +1,5 @@
+'use server';
+
 import InputSearch from "@/components/InputSearch";
 import { Suspense/* , useEffect, useRef, useState */ } from "react";
 import { Plus } from 'lucide-react';

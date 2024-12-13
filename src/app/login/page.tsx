@@ -21,7 +21,6 @@ import { LoaderCircle, LogIn } from 'lucide-react';
 } from "@/components/ui/select"; */
 import FormErrorMessage from '@/components/FormErrorMessage';
 import Image from 'next/image';
-import { ClientFetch } from '@/util/Fetching';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -57,7 +56,6 @@ export default function Login() {
 
     const onSubmit: SubmitHandler<LoginInputs> = async (inputs) => {
         setIsLoading(true);
-        const ftc = new ClientFetch();
 
         try {
 

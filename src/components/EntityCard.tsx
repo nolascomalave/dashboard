@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import styles from './UserCard.module.scss';
 import { Edit, UserRound } from 'lucide-react';
 import { Checkbox } from '@/hooks/useItemsSelector';
-// import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+// import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import { CompleteEntity } from '@/assets/types/entity';
 import { Ellipsis } from 'lucide-react';
 import Link from 'next/link';
@@ -50,7 +50,7 @@ export default function EntityCard({
     const [ entityData, setEntityData ] = useState<CompleteEntity>(Entity),
         { keyItem, value, ...controller } = selectableController ?? {};
     const router = useRouter();
-    // const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state);
+    // const { User: processedUser, setUser } = useProcessedCompleteEntityUser((state) => state);
 
     useEffect(() => {
         setEntityData(Entity);

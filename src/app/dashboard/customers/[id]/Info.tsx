@@ -2,7 +2,7 @@
 
 import { CompleteEntity } from "@/assets/types/entity";
 import SimpleTooltip from "@/components/SimpleTooltip";
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import Formats from "@/util/Formats";
 import { Edit } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +22,7 @@ export default function Info({ Customer }: { Customer: CompleteEntity }) {
         phones = Formats.getJsonFromString(Customer.phones) ?? [],
         emails = Formats.getJsonFromString(Customer.emails) ?? [];
 
-    // const { Customer: processedCustomer } = useProcessedCompleteEntity((state) => state);
+    // const { Customer: processedCustomer } = useProcessedCompleteEntityUser((state) => state);
 
     return (
         <div className="entity-info">

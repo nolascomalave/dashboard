@@ -3,7 +3,7 @@
 import { CompleteEntityUser } from "@/assets/types/users";
 import ConfirmModal from "@/components/ConfirmModal";
 import SimpleTooltip from "@/components/SimpleTooltip";
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import { ClientFetch } from "@/util/Fetching";
 import { KeyRound, Mail, Mails, Pencil, PhoneCall, UserRound, UserRoundCheck, UserRoundMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ export default function UserCard({
         [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
         [ isOpenActInactModal, setIsOpenActInactModal] = useState(false),
         [ isOpenConfirmResetPassword, setIsOpenConfirmResetPassword] = useState(false);
-    const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state),
+    const { User: processedUser, setUser } = useProcessedCompleteEntityUser((state) => state),
         [ userEmails, setUserEmails ] = useState<string[]>(userData.emails ?? []),
         [ userPhones, setUserPhones ] = useState<string[]>(userData.phones ?? []),
         router = useRouter(),

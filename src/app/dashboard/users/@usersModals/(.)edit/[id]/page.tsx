@@ -1,3 +1,5 @@
+'use server';
+
 import { Modal } from '@/layouts/UI/Modal';
 import UserForm from '@/layouts/UserForm';
 import { getUser } from '../../../actions';

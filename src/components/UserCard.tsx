@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import styles from './UserCard.module.scss';
 import { UserRound } from 'lucide-react';
 import { Checkbox } from '@/hooks/useItemsSelector';
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import { CompleteEntityUser } from '@/assets/types/users';
 import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export default function UserCard({
         [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
         [ isDisabledModal, setIsDisabledModal ] = useState<boolean>(false),
         [ isOpenActInactModal, setIsOpenActInactModal] = useState(false);
-    const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state);
+    const { User: processedUser, setUser } = useProcessedCompleteEntityUser((state) => state);
 
     const openActInactModal = () => {
         setIsDisabledModal(false);

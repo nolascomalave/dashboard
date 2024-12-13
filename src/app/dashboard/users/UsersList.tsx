@@ -1,3 +1,5 @@
+'use server';
+
 import { CompleteEntityUser } from "@/assets/types/users";
 import DatalistSectionMessage from "@/components/DatalistSectionMessage";
 import UserCard from "@/components/UserCard";
@@ -39,6 +41,7 @@ export default async function UsersList({
             headers: {
                 authorization: `Bearer ${session?.backendTokens.accessToken}`
             },
+            cache: 'no-store'
         });
 
         if(res.status !== 200) {

@@ -2,7 +2,7 @@
 
 import { CompleteEntity } from "@/assets/types/entity";
 import SimpleTooltip from "@/components/SimpleTooltip";
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import { ClientFetch } from "@/util/Fetching";
 import { Mail, Mails, PhoneCall, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -28,83 +28,8 @@ export default function CustomerCard({
     session: any;
 }) {
     const [ customerData, setCustomerData ] = useState<CompleteEntity>(customer),
-        [ isDisabledModal, setIsDisabledModal ] = useState<boolean>(false),
-        [ isSettingUserStatus, setIsSettingUserStatus ] = useState<boolean>(false),
-        [ isOpenActInactModal, setIsOpenActInactModal] = useState(false),
-        [ isOpenConfirmResetPassword, setIsOpenConfirmResetPassword] = useState(false);
-    const { User: processedUser, setUser } = useProcessedCompleteEntity((state) => state),
         [ customerEmails, setCustomerEmails ] = useState<string[]>(customerData.emails ?? []),
-        [ customerPhones, setCustomerPhones ] = useState<string[]>(customerData.phones ?? []),
-        router = useRouter(),
-        isAdminSession = session.user.is_admin && session.user.username.toLowerCase() === 'admin',
-        isAdminUser = false, // customerData.is_admin && customerData.username.toLowerCase() === 'admin',
-        isUserSessionAndUserSame = session.user.id === customerData.id_system_subscription_user;
-
-    const openActInactModal = () => {
-        setIsDisabledModal(false);
-        setIsOpenActInactModal(true);
-    };
-
-    const changingUserStatus = async (closeModal: () => any, id_system_subscription_user: number, is_inactive: boolean) => {
-        setIsSettingUserStatus(true);
-        setIsDisabledModal(true);
-
-        const ftc = new ClientFetch();
-
-        try {
-            const res = await ftc.patch({
-                url: `${process.env.API}/system-subscription-users/change-status`,
-                data: {
-                    type: is_inactive ? 'ACTIVE' : 'INACTIVE',
-                    id_system_subscription_user
-                },
-                headers: {
-                    authorization: `Bearer ${session?.backendTokens.accessToken}`
-                }
-            });
-
-            if(res.status !== 200) {
-                if(res.status === 401) {
-                    // return router.push('/login');
-                }
-
-                throw 'error';
-            }
-
-            const { data, message } = await res.json();
-
-            closeModal();
-
-            /* setCustomerData({
-                ...customer,
-                inactivated_at_system_subscription_user: data.inactivated_at,
-                inactivated_by_system_subscription_user: data.inactivated_by
-            }); */
-
-            toast[is_inactive ? 'success' : 'warning'](message, {
-                position: 'bottom-right',
-                closeButton: true
-            });
-        } catch(e: any) {
-            toast.error('An unexpected error has occurred.', {
-                position: 'bottom-left',
-                closeButton: true,
-                duration: Infinity
-            });
-            setIsDisabledModal(false);
-        }
-
-        setIsSettingUserStatus(false);
-    };
-
-    /* useEffect(() => {
-        if(!processedUser || processedUser.id_system_subscription_user != customerData.id_system_subscription_user) {
-            return;
-        }
-
-        setCustomerData(processedUser);
-        setUser(null);
-    }, [processedUser]); */
+        [ customerPhones, setCustomerPhones ] = useState<string[]>(customerData.phones ?? [])
 
     useEffect(() => {
         setCustomerEmails(getJsonFromString(customerData.emails) ?? []);
@@ -222,79 +147,6 @@ export default function CustomerCard({
                         </div>
                     )}
                 </div>
-
-                {/* {((!!customerData.is_admin && customerData.username.toLowerCase() === 'admin' && (!session.user || session.user.id !== customerData.id_system_subscription_user)) || (!!session.user && session.user.id === customerData.id_system_subscription_user)) ? null : (
-                    <div className='flex rounded-b-sm pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
-                        <SimpleTooltip text={'Edit'} >
-                            <button type='button' className='flex justify-center items-center w-full bg-white px-3 py-2'>
-                                <Pencil />
-                            </button>
-                        </SimpleTooltip>
-                        <SimpleTooltip text={(!!customerData.inactivated_at_system_subscription_user || !!customerData.inactivated_at) ? 'Activate' : 'Inactivate'} >
-                            <button
-                                type='button'
-                                className='flex justify-center items-center w-full bg-white px-3 py-2'
-                                onClick={openActInactModal}
-                            >
-                                {(!!customerData.inactivated_at_system_subscription_user || !!customerData.inactivated_at) ? (
-                                    <UserRoundCheck />
-                                ) : (
-                                    <UserRoundMinus />
-                                )}
-                            </button>
-                        </SimpleTooltip>
-                        <SimpleTooltip text={'Change Password'} >
-                            <button type='button' className='flex justify-center items-center w-full bg-white px-3 py-2'>
-                                <KeyRound />
-                            </button>
-                        </SimpleTooltip>
-                    </div>
-                )} */}
-
-                {/* <div className='flex rounded-b-sm pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
-                    {((isAdminSession || (isAdminUser && session.user.id === customerData.id_system_subscription_user) || !isAdminUser) && !(isAdminUser && customerData.username.toLowerCase() === 'admin')) && (
-                        <SimpleTooltip text={'Edit'} >
-                            <button
-                                type='button'
-                                className='flex justify-center items-center w-full bg-white px-3 py-2'
-                                onClick={() => router.push(`/dashboard/users/edit/${customerData.id_system_subscription_user}`)}
-                            >
-                                <Pencil />
-                            </button>
-                        </SimpleTooltip>
-                    )}
-
-                    {(!isUserSessionAndUserSame && (isAdminSession || !isAdminUser)) && (
-                        <SimpleTooltip text={(!!customerData.inactivated_at_system_subscription_user || !!customerData.inactivated_at) ? 'Activate' : 'Inactivate'} >
-                            <button
-                                type='button'
-                                className='flex justify-center items-center w-full bg-white px-3 py-2'
-                                onClick={openActInactModal}
-                            >
-                                {(!!customerData.inactivated_at_system_subscription_user || !!customerData.inactivated_at) ? (
-                                    <UserRoundCheck />
-                                ) : (
-                                    <UserRoundMinus />
-                                )}
-                            </button>
-                        </SimpleTooltip>
-                    )}
-
-                    {(((isAdminSession && !isAdminUser) || isUserSessionAndUserSame) && !customerData.inactivated_at_system_subscription_user && !customerData.inactivated_at) && (
-                        <SimpleTooltip text={(isUserSessionAndUserSame ? 'Change' : 'Reset').concat(' Password')} >
-                            <button
-                                type='button'
-                                className='flex justify-center items-center w-full bg-white px-3 py-2'
-                                onClick={isUserSessionAndUserSame ? () => router.push(`/dashboard/users/change-password`) : (() => {
-                                    setIsDisabledModal(false);
-                                    setIsOpenConfirmResetPassword(true);
-                                })}
-                            >
-                                <KeyRound />
-                            </button>
-                        </SimpleTooltip>
-                    )}
-                </div> */}
             </div>
         </>
     );

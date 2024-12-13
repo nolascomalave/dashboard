@@ -27,6 +27,7 @@ export default async function Page() {
             ModalContentStyles={{
                 maxWidth: '20rem'
             }}
+            useDisableButtonState={true}
         >
             <ChangePasswordForm
                 session={session}

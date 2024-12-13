@@ -2,7 +2,7 @@
 
 import { CompleteEntityUser } from "@/assets/types/users";
 import SimpleTooltip from "@/components/SimpleTooltip";
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import Formats from "@/util/Formats";
 import { useEffect, useState } from "react";
 
@@ -13,7 +13,7 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
         [ documents, setDocuments ] = useState(Formats.getJsonFromString(User.documents) ?? []),
         [ phones, setPhones ] = useState(Formats.getJsonFromString(User.phones) ?? []),
         [ emails, setEmails ] = useState(Formats.getJsonFromString(User.emails) ?? []);
-    const { User: processedUser } = useProcessedCompleteEntity((state) => state);
+    const { User: processedUser } = useProcessedCompleteEntityUser((state) => state);
 
     useEffect(() => {
         if(!processedUser || processedUser.id_system_subscription_user != userData.id_system_subscription_user) {
@@ -39,8 +39,8 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
                     <li>
                         <b className="opacity-65 text-[0.7rem]">{typename.type}</b>
                         <ul className="pl-2 font-extralight">
-                            {typename.names.map(name => (
-                                <li><span title={name}>{name}</span></li>
+                            {typename.names.(map, index)(name => (
+                                <li key={index}><span title={name}>{name}</span></li>
                             ))}
                         </ul>
                     </li>
@@ -68,8 +68,8 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
                     <li>
                         <b className="opacity-65 text-[0.7rem]">DOCUMENTS</b>
                         <ul className="pl-2 font-extralight">
-                            {documents.map(doc => (
-                                <li><SimpleTooltip selectable={true} text={doc.category}><b>{doc.symbol}:</b></SimpleTooltip> <SimpleTooltip selectable={true} text={doc.document}><span>{doc.document}</span></SimpleTooltip></li>
+                            {documents.map((doc, index) => (
+                                <li key={index}><SimpleTooltip selectable={true} text={doc.category}><b>{doc.symbol}:</b></SimpleTooltip> <SimpleTooltip selectable={true} text={doc.document}><span>{doc.document}</span></SimpleTooltip></li>
                             ))}
                         </ul>
                     </li>
@@ -79,8 +79,8 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
                     <li>
                         <b className="opacity-65 text-[0.7rem]">EMAILS</b>
                         <ul className="pl-2 font-extralight">
-                            {emails.map(email => (
-                                <li><SimpleTooltip selectable={true} text={email}><span>{email}</span></SimpleTooltip></li>
+                            {emails.map((email, index) => (
+                                <li key={index}><SimpleTooltip selectable={true} text={email}><span>{email}</span></SimpleTooltip></li>
                             ))}
                         </ul>
                     </li>
@@ -90,8 +90,8 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
                     <li>
                         <b className="opacity-65 text-[0.7rem]">PHONES</b>
                         <ul className="pl-2 font-extralight">
-                            {phones.map(phone => (
-                                <li><SimpleTooltip selectable={true} text={phone}><span>{phone}</span></SimpleTooltip></li>
+                            {phones.map((phone, index) => (
+                                <li key={index}><SimpleTooltip selectable={true} text={phone}><span>{phone}</span></SimpleTooltip></li>
                             ))}
                         </ul>
                     </li>

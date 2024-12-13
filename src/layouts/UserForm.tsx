@@ -12,7 +12,7 @@ import { ClientFetch } from "@/util/Fetching.js";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
-import { useProcessedCompleteEntity } from "@/store/ProcessedCompleteEntity";
+import { useProcessedCompleteEntityUser } from "@/store/ProcessedCompleteEntityUser";
 import * as API_consts from '@/assets/API_Constants';
 
 import {
@@ -104,12 +104,11 @@ export default function UserForm({
         }),
         genderRegister = register("gender");
 
-    const { setUser } = useProcessedCompleteEntity();
+    const { setUser } = useProcessedCompleteEntityUser();
 
     closeModal ??= () => {
         router.push('/dashboard/users');
     }
-
 
     const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
         setIsLoading(true);

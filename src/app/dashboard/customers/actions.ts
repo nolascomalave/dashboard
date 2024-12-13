@@ -28,7 +28,8 @@ export async function getEntity(id: number | string) {
                 allEntityInfo: true
             },
             headers: {
-                authorization: `Bearer ${session?.backendTokens.accessToken}`
+                authorization: `Bearer ${session?.backendTokens.accessToken}`,
+                'Cache-Control': 'no-store'
             },
             cache: "no-store"
         });

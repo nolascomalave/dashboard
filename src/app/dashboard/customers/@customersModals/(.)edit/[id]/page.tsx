@@ -1,3 +1,5 @@
+'use server';
+
 import { Modal } from '@/layouts/UI/Modal';
 import CustomerForm from '@/layouts/CustomerForm';
 import { getEntity } from '../../../actions';

@@ -15,7 +15,8 @@ export function Modal({
     children,
     passCloseFunction = true,
     ModalContentClass,
-    ModalContentStyles
+    ModalContentStyles,
+    useDisableButtonState = false
 }: {
     title: any;
     closeInmediatly: null | {
@@ -27,6 +28,7 @@ export function Modal({
     passCloseFunction?: boolean;
     ModalContentClass?: string;
     ModalContentStyles?: React.CSSProperties;
+    useDisableButtonState: boolean;
 }) {
   const router = useRouter(),
     [ isDisabledCloseBtnModal, setIsDisabledCloseBtnModal ] = useState<Boolean>(false),
@@ -87,7 +89,13 @@ export function Modal({
                     )}
                 </header>
 
-                { passCloseFunction ? React.cloneElement(children, { closeModal, isDisabledCloseBtnModal, setIsDisabledCloseBtnModal }) : children }
+                { passCloseFunction ? React.cloneElement(children, {
+                    closeModal,
+                    ...(useDisableButtonState === true ? {} : {
+                        isDisabledCloseBtnModal,
+                        setIsDisabledCloseBtnModal
+                    })
+                }) : children }
             </div>
         </div>
     ),

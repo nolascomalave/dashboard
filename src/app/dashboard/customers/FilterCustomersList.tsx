@@ -35,6 +35,7 @@ export default function FilterUsersList({
             }
         }
 
+        console.log(`${pathname}?${params.toString()}`);
         replace(`${pathname}?${params.toString()}`);
     }, 300);
 

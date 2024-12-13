@@ -5,16 +5,18 @@ import clsx from 'clsx';
 const CheckSwitch = ({
     className = '',
     defaultChecked = false,
+    checked,
     ...props
 } : {
     className?: string,
     defaultChecked?: boolean,
+    checked?: boolean
 }) => {
     return (
         <input
             className={clsx(styles.switch, className)}
             type="checkbox"
-            defaultChecked={defaultChecked}
+            checked={checked}
             {...((typeof props === 'object' && !Array.isArray(props)) ? props : {})}
         />
     );

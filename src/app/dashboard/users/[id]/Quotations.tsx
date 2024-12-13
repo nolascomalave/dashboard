@@ -1,3 +1,5 @@
+'use server';
+
 import QuotationsTable from "./QuotationsTable";
 
 export default async function Quotations({ id }: { id: number | string }) {
