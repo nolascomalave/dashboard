@@ -76,9 +76,9 @@ export default async function CustomersList({
                             <EntityCard
                                 session={session}
                                 Entity = {user}
-                                CurrentEntity = {(!!session && !!session.user && user.id_system_subscription_user === session.user.id) ? session.user : null}
-                                hrefEdit = {`/dashboard/customers/edit/${user.id_system_subscription_user}`}
-                                // image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`}
+                                CurrentEntity = {(!!session && !!session.user && user.system_subscription_user_id === session.user.id) ? session.user : null}
+                                hrefEdit = {`/dashboard/customers/edit/${user.system_subscription_user_id}`}
+                                // image = {!user.photo ? '' : `${process.env.API}/storage/entity/entity-${user.entity_id}/${user.photo}`}
                                 /* activateAction = { openActInactModal } */
                                 /* inactivateAction = { openActInactModal } */
                             />

@@ -16,7 +16,7 @@ export default function Info({ User }: { User: CompleteEntityUser }) {
     const { User: processedUser } = useProcessedCompleteEntityUser((state) => state);
 
     useEffect(() => {
-        if(!processedUser || processedUser.id_system_subscription_user != userData.id_system_subscription_user) {
+        if(!processedUser || processedUser.system_subscription_user_id != userData.system_subscription_user_id) {
             return;
         }
 

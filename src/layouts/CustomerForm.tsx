@@ -81,16 +81,16 @@ export default function CustomerForm({
         [isLoading, setIsLoading] = useState<boolean>(initialLoading),
         initialValues = {
             is_natural: !customer ? true : (customer.is_natural == 1),
-            business_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.bussiness_name) ?? {names: ['']}).names[0],
-            comercial_designation: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.comercial_designation) ?? {names: ['']}).names[0],
+            business_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.bussiness_name) ?? {names: ['']}).names[0],
+            comercial_designation: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.comercial_designation) ?? {names: ['']}).names[0],
             photo: (!customer || !customer.photo )? null : undefined,
-            first_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
-            second_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
-            first_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
-            second_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
+            first_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+            second_name: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+            first_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+            second_surname: !customer ? '' : ((customer.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
             address: !customer ? '' : (customer.address ?? ''),
             gender: (!customer || !(customer.is_natural == 1)) ? '' : (customer.gender ?? ''),
-            ssn: (!customer || customer.documents === null) ? '' : ((customer.documents ?? []).find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+            ssn: (!customer || customer.documents === null) ? '' : ((customer.documents ?? []).find(doc => doc.entity_document_category_id === 1) ?? {document: ''}).document,
             email: (!customer || customer.emails === null) ? '' : (customer.emails[0]),
             first_phone: (!customer || customer.phones === null) ? '' : (customer.phones[0]),
             second_phone: (!customer || customer.phones === null) ? '' : (customer.phones[1] ?? '')
@@ -159,7 +159,7 @@ export default function CustomerForm({
 
         names.push({
             name: inputs[inputs.is_natural ? 'first_name' : 'business_name'],
-            id_entity_name_type: API_consts.entity_name_type[inputs.is_natural ? 'name' : 'bussiness_name'],
+            entity_name_type_id: API_consts.entity_name_type[inputs.is_natural ? 'name' : 'bussiness_name'],
             order: 1
         });
 
@@ -167,7 +167,7 @@ export default function CustomerForm({
             if((inputs.second_name ?? '').trim().length > 0) {
                 names.push({
                     name: inputs.second_name,
-                    id_entity_name_type: API_consts.entity_name_type.name,
+                    entity_name_type_id: API_consts.entity_name_type.name,
                     order: 2
                 });
 
@@ -179,7 +179,7 @@ export default function CustomerForm({
         } else if((inputs.comercial_designation ?? '').trim().length > 0) {
             names.push({
                 name: inputs.comercial_designation,
-                id_entity_name_type: API_consts.entity_name_type.comercial_designation,
+                entity_name_type_id: API_consts.entity_name_type.comercial_designation,
                 order: 2
             });
 
@@ -192,7 +192,7 @@ export default function CustomerForm({
         if(inputs.is_natural) {
             names.push({
                 name: inputs.first_surname,
-                id_entity_name_type: API_consts.entity_name_type.surname,
+                entity_name_type_id: API_consts.entity_name_type.surname,
                 order: 1
             });
 
@@ -204,7 +204,7 @@ export default function CustomerForm({
             if((inputs.second_surname ?? '').trim().length > 0) {
                 names.push({
                     name: inputs.second_surname,
-                    id_entity_name_type: API_consts.entity_name_type.surname,
+                    entity_name_type_id: API_consts.entity_name_type.surname,
                     order: 2
                 });
 
@@ -218,7 +218,7 @@ export default function CustomerForm({
 
             data.append('documents', JSON.stringify([{
                 document: inputs.ssn,
-                id_entity_document_category: 1,
+                entity_document_category_id: 1,
                 order: 1
             }]));
         }

@@ -26,14 +26,14 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 type LoginInputs = {
-    id_system_subscription: number,
+    system_subscription_id: string,
     username: string,
     password: string
 };
 type LoginInputsKeys = keyof LoginInputs;
 
 const aliases = {
-    id_system_subscription: 'Entity ID',
+    system_subscription_id: 'Entity ID',
     username: 'Username',
     password: 'Password'
 }
@@ -52,7 +52,7 @@ export default function Login() {
         } = useForm<LoginInputs>({
             resolver: zodResolver(loginSchema),
         }),
-        entityRegister = register('id_system_subscription', {disabled: isLoading});
+        entityRegister = register('system_subscription_id', {disabled: isLoading});
 
     const onSubmit: SubmitHandler<LoginInputs> = async (inputs) => {
         setIsLoading(true);
@@ -181,13 +181,13 @@ export default function Login() {
                                         defaultValue={''}
                                     >
                                         <option disabled value={''}>Select...</option>
-                                        <option value={1}>
+                                        <option value={'f58a534f-853f-4ad1-9dac-5418763dc6c0'}>
                                             New Evolution
                                         </option>
                                     </select>
 
                                     {/* <Select
-                                        onValueChange={(val: string) => entityRegister.onChange({target: {name: 'id_system_subscription', value: Number(val)}})}
+                                        onValueChange={(val: string) => entityRegister.onChange({target: {name: 'system_subscription_id', value: Number(val)}})}
                                         {...entityRegister}
                                     >
                                         <SelectTrigger id="gender" className="w-full">
@@ -200,7 +200,7 @@ export default function Login() {
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select> */}
-                                    {errors.id_system_subscription?.message && <FormErrorMessage>{errors.id_system_subscription?.message}</FormErrorMessage>}
+                                    {errors.system_subscription_id?.message && <FormErrorMessage>{errors.system_subscription_id?.message}</FormErrorMessage>}
                                 </div>
 
                                 <div className="w-full items-center gap-1.5">

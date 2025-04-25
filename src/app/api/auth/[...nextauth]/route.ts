@@ -33,11 +33,11 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         username: {},
         password: {},
-        id_system_subscription: {}
+        system_subscription_id: {}
       },
       async authorize(credentials, req) {
-        if (!credentials?.username || !credentials?.password || !credentials?.id_system_subscription) return null;
-        const { username, password, id_system_subscription } = credentials;
+        if (!credentials?.username || !credentials?.password || !credentials?.system_subscription_id) return null;
+        const { username, password, system_subscription_id } = credentials;
 
         const ftc = new ClientFetch();
 
@@ -47,8 +47,8 @@ export const authOptions: NextAuthOptions = {
             data: {
                 username,
                 password,
-                id_system_subscription: Number(id_system_subscription),
-                id_system: Number(process.env.id_system)
+                system_subscription_id: system_subscription_id,
+                system_id: process.env.system_id
             }
         });
 
@@ -59,6 +59,12 @@ export const authOptions: NextAuthOptions = {
         const response = await res.json();
 
         if(res.status !== 200) {
+          console.log(response, {
+            username,
+            password,
+            system_subscription_id: system_subscription_id,
+            system_id: process.env.system_id
+        });
           throw new Error(JSON.stringify(response));
         }
 

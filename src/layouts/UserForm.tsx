@@ -76,13 +76,13 @@ export default function UserForm({
         [isLoading, setIsLoading] = useState<boolean>(initialLoading),
         initialValues = {
             photo: (!user || !user.photo )? null : undefined,
-            first_name: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
-            second_name: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
-            first_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
-            second_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.id_entity_name_type === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
+            first_name: !user ? '' : ((user.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.name) ?? {names: ['']}).names[0],
+            second_name: !user ? '' : ((user.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.name) ?? {names: ['']}).names[1] ?? '',
+            first_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.surname) ?? {names: ['']}).names[0],
+            second_surname: !user ? '' : ((user.names_obj ?? []).find(names => names.entity_name_type_id === API_consts.entity_name_type.surname) ?? {names: ['']}).names[1] ?? '',
             address: !user ? '' : (user.address ?? ''),
             gender: !user ? '' : (user.gender ?? ''),
-            ssn: (!user || user.documents === null) ? '' : ((user.documents ?? []).find(doc => doc.id_entity_document_category === 1) ?? {document: ''}).document,
+            ssn: (!user || user.documents === null) ? '' : ((user.documents ?? []).find(doc => doc.entity_document_category_id === 1) ?? {document: ''}).document,
             email: (!user || user.emails === null) ? '' : (user.emails[0]),
             first_phone: (!user || user.phones === null) ? '' : (user.phones[0]),
             second_phone: (!user || user.phones === null) ? '' : (user.phones[1] ?? '')
@@ -153,14 +153,14 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_name,
-            id_entity_name_type: API_consts.entity_name_type.name,
+            entity_name_type_id: API_consts.entity_name_type.name,
             order: 1
         });
 
         if((inputs.second_name ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_name,
-                id_entity_name_type: API_consts.entity_name_type.name,
+                entity_name_type_id: API_consts.entity_name_type.name,
                 order: 2
             });
 
@@ -172,7 +172,7 @@ export default function UserForm({
 
         names.push({
             name: inputs.first_surname,
-            id_entity_name_type: API_consts.entity_name_type.surname,
+            entity_name_type_id: API_consts.entity_name_type.surname,
             order: 1
         });
 
@@ -184,7 +184,7 @@ export default function UserForm({
         if((inputs.second_surname ?? '').trim().length > 0) {
             names.push({
                 name: inputs.second_surname,
-                id_entity_name_type: API_consts.entity_name_type.surname,
+                entity_name_type_id: API_consts.entity_name_type.surname,
                 order: 2
             });
 
@@ -200,7 +200,7 @@ export default function UserForm({
 
         data.append('documents', JSON.stringify([{
             document: inputs.ssn,
-            id_entity_document_category: 1,
+            entity_document_category_id: "9fd37314-7624-4f8d-b6f0-610fe66f10b3",
             order: 1
         }]));
 
@@ -228,7 +228,7 @@ export default function UserForm({
 
         try {
             const res = await ftc.post({
-                url: `${process.env.API}/system-subscription-users${!user ? '' : `/${user.id_system_subscription_user}`}`,
+                url: `${process.env.API}/system-subscription-users${!user ? '' : `/${user.system_subscription_user_id}`}`,
                 data: data,
                 headers: {
                     authorization: `Bearer ${session?.backendTokens.accessToken}`
@@ -353,7 +353,7 @@ export default function UserForm({
                                     required = {photoRegister.required}
                                     refference = {photoRegister.ref} */
                                     disabled={isLoading}
-                                    initialImage = {!user ? undefined : (!user.photo ? undefined : `${process.env.API}/storage/entity/entity-${user.id_entity}/${user.photo}`)}
+                                    initialImage = {!user ? undefined : (!user.photo ? undefined : `${process.env.API}/storage/entity/entity-${user.entity_id}/${user.photo}`)}
                                     name="photo"
                                     onChange={(e: { target: { name: 'photo', files: FileList } }) => {
                                         setValue('photo', e.target.files[0]);

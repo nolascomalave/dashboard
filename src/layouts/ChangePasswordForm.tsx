@@ -69,7 +69,7 @@ export default function ChangePasswordForm({
             const res = await ftc.patch({
                 url: `${process.env.API}/system-subscription-users/change-password`,
                 data: {
-                    id_system_subscription_user: session?.user.id_system_subscription_user,
+                    system_subscription_user_id: session?.user.system_subscription_user_id,
                     current_password: inputs.current_password,
                     new_password: inputs.new_password
                 },

@@ -1,7 +1,7 @@
 export type CompleteEntity = {
     id: number;
-    id_entity_parent: number;
-    id_document: number;
+    entity_parent_id: string;
+    document_id: string;
     is_natural: 1 | 0;
     name: string;
     gender: null | 'Male' | 'Female';
@@ -18,7 +18,7 @@ export type CompleteEntity = {
     names_obj: string | {
         type: string,
         names: string[],
-        id_entity_name_type: number
+        entity_name_type_id: string
     }[];
     names: null | string;
     surnames: null | string;
@@ -29,18 +29,18 @@ export type CompleteEntity = {
         id: number,
         order: number,
         symbol: string,
-        id_city: null | number,
+        city_id: null | number,
         category: string,
         document: string,
-        id_state: null | number,
-        id_entity: number,
-        id_country: null | number,
-        id_entity_document: number,
-        id_entity_document_category: number
+        state_id: null | number,
+        entity_id: string,
+        country_id: null | number,
+        entity_document_id: string,
+        entity_document_category_id: string
     };
     phones: null | string[];
     emails: null | string[];
-    id_system: number;
-    id_system_subscription: number;
-    id_system_subscription_user: number;
+    system_id: string;
+    system_subscription_id: string;
+    system_subscription_user_id: string;
 }

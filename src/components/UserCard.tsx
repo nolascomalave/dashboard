@@ -48,7 +48,7 @@ export default function UserCard({
         setIsOpenActInactModal(true);
     };
 
-    const changingUserStatus = async (closeModal: () => any, id_system_subscription_user: number, is_inactive: boolean) => {
+    const changingUserStatus = async (closeModal: () => any, system_subscription_user_id: string, is_inactive: boolean) => {
         setIsSettingUserStatus(true);
         setIsDisabledModal(true);
 
@@ -59,7 +59,7 @@ export default function UserCard({
                 url: `${process.env.API}/system-subscription-users/change-status`,
                 data: {
                     type: is_inactive ? 'ACTIVE' : 'INACTIVE',
-                    id_system_subscription_user
+                    system_subscription_user_id
                 },
                 headers: {
                     authorization: `Bearer ${session?.backendTokens.accessToken}`
@@ -105,7 +105,7 @@ export default function UserCard({
     }, [User]);
 
     useEffect(() => {
-        if(!processedUser || processedUser.id_system_subscription_user != userData.id_system_subscription_user) {
+        if(!processedUser || processedUser.system_subscription_user_id != userData.system_subscription_user_id) {
             return;
         }
 
@@ -154,7 +154,7 @@ export default function UserCard({
                             ) : (
                                 <img
                                     className='w-full h-full object-cover object-center rounded-full'
-                                    src={`${process.env.API}/storage/entity/entity-${userData.id_entity}/${userData.photo}`}
+                                    src={`${process.env.API}/storage/entity/entity-${userData.entity_id}/${userData.photo}`}
                                     alt={"Photo"}
                                 />
                             )}
@@ -176,7 +176,7 @@ export default function UserCard({
                 <div className='h-full text-center mt-2 mb-4'>
                     <p>
                         <Link
-                            href = {`/dashboard/users/${userData.id_system_subscription_user}`}
+                            href = {`/dashboard/users/${userData.system_subscription_user_id}`}
                             className='font-bold cursor-pointer focus:underline focus:decoration-solid hover:underline hover:decoration-solid'
                         >
                             { userData.name }
@@ -186,7 +186,7 @@ export default function UserCard({
                     { userData.is_admin == 1 ? <p className='opacity-50'>Master User</p> : null }
                 </div>
 
-                {((!!userData.is_admin && userData.username.toLowerCase() === 'admin' && (!CurrentUser || CurrentUser.id !== userData.id_system_subscription_user)) || (!!CurrentUser && CurrentUser.id === userData.id_system_subscription_user)) ? null : (
+                {((!!userData.is_admin && userData.username.toLowerCase() === 'admin' && (!CurrentUser || CurrentUser.id !== userData.system_subscription_user_id)) || (!!CurrentUser && CurrentUser.id === userData.system_subscription_user_id)) ? null : (
                     <div className='flex pt-[0.0625rem] gap-[0.0625rem] bg-gray-100'>
                         {/* <button
                             type='button'
@@ -200,7 +200,7 @@ export default function UserCard({
                         >
                             Edit
                         </Link>
-                        {((userData.inactivated_at_system_subscription_user ?? null) !== null && (!CurrentUser || CurrentUser.id !== userData.id_system_subscription_user)) ? (
+                        {((userData.inactivated_at_system_subscription_user ?? null) !== null && (!CurrentUser || CurrentUser.id !== userData.system_subscription_user_id)) ? (
                             <button
                                 type='button'
                                 className='w-full bg-white px-2 py-1 duration-150 hover:text-green-600 focus:text-green-600'
@@ -229,7 +229,7 @@ export default function UserCard({
                 title = {(!!userData?.inactivated_at_system_subscription_user ? 'Activate' : 'Inactivate') + " user"}
                 showLoader = {isSettingUserStatus}
                 disabled = {isDisabledModal}
-                acceptAction = {closeModal => changingUserStatus(closeModal, userData?.id_system_subscription_user ?? 0, !!userData?.inactivated_at_system_subscription_user)}
+                acceptAction = {closeModal => changingUserStatus(closeModal, userData?.system_subscription_user_id ?? 0, !!userData?.inactivated_at_system_subscription_user)}
                 text = {(
                     <>
                         Are you sure to {!!userData?.inactivated_at_system_subscription_user ? 'activate' : 'inactivate'} the user "<b>{userData?.username.toUpperCase()}</b>"?

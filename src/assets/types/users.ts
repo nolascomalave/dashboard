@@ -1,13 +1,13 @@
 export type FullUser = {
     id: number;
-    id_system: number;
-    id_system_subscription: number;
-    id_entity: number;
-    id_system_subscription_user: number;
+    system_id: string;
+    system_subscription_id: string;
+    entity_id: string;
+    system_subscription_user_id: string;
     username: string;
     password: string;
     names_obj: string | {
-        id_entity_name_type: number;
+        entity_name_type_id: string;
         type: string;
         names: string[]
     }[];
@@ -37,17 +37,17 @@ export type FullUser = {
 
 export type CompleteEntityUser = {
     id: number;
-    id_system: number;
-    id_system_subscription: number;
-    id_entity: number;
-    id_system_subscription_user: number;
+    system_id: string;
+    system_subscription_id: string;
+    entity_id: string;
+    system_subscription_user_id: string;
     username: string;
     password: string;
     name: string;
     names_obj: string | {
         type: string,
         names: string[],
-        id_entity_name_type: number
+        entity_name_type_id: string
     }[];
     complete_name: string;
     names: string | null;
@@ -56,14 +56,14 @@ export type CompleteEntityUser = {
         id: number,
         order: number,
         symbol: string,
-        id_city: null | number,
+        city_id: null | number,
         category: string,
         document: string,
-        id_state: null | number,
-        id_entity: number,
-        id_country: null | number,
-        id_entity_document: number,
-        id_entity_document_category: number
+        state_id: null | number,
+        entity_id: string,
+        country_id: null | number,
+        entity_document_id: string,
+        entity_document_category_id: string
     };
     phones: null | string[];
     emails: null | string[];
@@ -82,8 +82,8 @@ export type CompleteEntityUser = {
     annulled_by_system_subscription_user: Date | null;
     annulled_at: Date | null;
     annulled_by: number | null;
-    id_entity_parent: number;
-    id_document: number;
+    entity_parent_id: string;
+    document_id: string;
     is_natural: 1 | 0;
     gender: null | 'Male' | 'Female';
     date_birth: null | string | Date;
