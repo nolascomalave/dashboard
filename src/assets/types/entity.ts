@@ -1,6 +1,6 @@
 export type CompleteEntity = {
     id: number;
-    entity_parent_id: string;
+    // entity_parent_id: string;
     document_id: string;
     is_natural: 1 | 0;
     name: string;

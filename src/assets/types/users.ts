@@ -82,7 +82,7 @@ export type CompleteEntityUser = {
     annulled_by_system_subscription_user: Date | null;
     annulled_at: Date | null;
     annulled_by: number | null;
-    entity_parent_id: string;
+    // entity_parent_id: string;
     document_id: string;
     is_natural: 1 | 0;
     gender: null | 'Male' | 'Female';
